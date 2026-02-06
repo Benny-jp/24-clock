@@ -12,20 +12,18 @@
         body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f0f0; font-family: 'Zen Maru Gothic', sans-serif; overflow: hidden; }
         .clock { width: var(--size); height: var(--size); background: linear-gradient(to right, #fff 50%, var(--mint) 50%); border: 12px solid #fff; border-radius: 50%; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
         
-        /* ロゴ：黒・丸文字・改行 */
         .logo { position: absolute; top: 68%; width: 100%; text-align: center; font-size: 1.3rem; line-height: 1.2; color: var(--black); z-index: 5; pointer-events: none; }
         .logo span { font-size: 1.6rem; display: block; font-weight: 900; }
 
         .marker { position: absolute; width: 100%; height: 100%; text-align: center; }
         
-        /* 24時間の数字：外周寄り */
-        .hour-num { font-size: 1.6rem; font-weight: 900; padding: 25px; box-sizing: border-box; color: #222; }
-        /* 分の数字 */
+        /* 24時間の数字：外周ギリギリに配置 */
+        .hour-num { font-size: 1.6rem; font-weight: 900; padding: 22px; box-sizing: border-box; color: #222; }
         .min-num { font-size: 0.9rem; padding: 5px; box-sizing: border-box; color: #555; }
         
-        /* 視認性を高めるドット */
+        /* 目盛りを短く(4px)修正 */
+        .tick { position: absolute; width: 2px; height: 4px; background: #333; left: 50%; transform-origin: 0 calc(var(--size) / 2); margin-left: -1px; }
         .dot { position: absolute; width: 4px; height: 4px; background: #aaa; border-radius: 50%; left: 50%; transform-origin: 0 calc(var(--size) / 2); margin-left: -2px; }
-        .tick { position: absolute; width: 2px; height: 10px; background: #333; left: 50%; transform-origin: 0 calc(var(--size) / 2); margin-left: -1px; }
 
         .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 6px; background: #222; }
         .hour-hand { width: 9px; height: 28%; z-index: 10; }
@@ -46,7 +44,6 @@
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(()=>{}); }
     const clock = document.getElementById('clock');
     
-    // 24時間目盛りと数字
     for (let i = 1; i <= 24; i++) {
         const r = i * 15;
         const h = document.createElement('div'); h.className = 'marker hour-num';
@@ -59,7 +56,6 @@
         clock.appendChild(t);
     }
     
-    // 1分ごとのドットと5分ごとの数字
     for (let i = 0; i < 60; i++) {
         const r = i * 6;
         if (i % 5 === 0) {
@@ -69,7 +65,7 @@
             clock.appendChild(m);
         } else {
             const d = document.createElement('div'); d.className = 'dot';
-            d.style.transform = `rotate(${r}deg) translateY(12px)`;
+            d.style.transform = `rotate(${r}deg) translateY(8px)`;
             clock.appendChild(d);
         }
     }
