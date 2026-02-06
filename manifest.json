@@ -7,3 +7,20 @@
   "theme_color": "#B2E2D2",
   "icons": [{ "src": "icon.png", "sizes": "512x512", "type": "image/png" }]
 }
+
+{
+  "short_name": "Sonochiii",
+  "name": "Study with Sonochiii Clock",
+  "display": "standalone",
+  "start_url": "index.html",
+  "background_color": "#ffffff",
+  "theme_color": "#B2E2D2",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
