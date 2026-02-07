@@ -3,133 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study with Sonochiii | 24H Life Clock</title>
+    <title>Study with Sonochiii | Life Clock 24</title>
     <style>
         :root {
-            --mint-green: #B2E2C9; /* 指示通りのミントグリーン */
-            --bg-white: #FFFFFF;
-            --text-main: #1A1A1A;
-            --accent-red: #E63946;
+            --mint-green: #B2E2C9;
+            --pure-white: #FFFFFF;
+            --clock-black: #1A1A1A;
+            --second-red: #D90429;
         }
         body {
             margin: 0;
+            background: #F8F9FA;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background-color: #FAFAFA;
-            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
         }
-        .clock-wrapper {
+        .clock-container {
             width: 95vmin;
             height: 95vmin;
-            max-width: 700px;
-            max-height: 700px;
+            max-width: 800px;
+            max-height: 800px;
+            position: relative;
         }
         svg {
             width: 100%;
             height: 100%;
-            overflow: visible;
+            filter: drop-shadow(0 15px 35px rgba(0,0,0,0.12));
         }
-        /* 針の動きを滑らかに */
-        .hand { stroke-linecap: round; }
     </style>
 </head>
 <body>
 
-<div class="clock-wrapper">
+<div class="clock-container">
     <svg viewBox="0 0 400 400">
-        <circle cx="200" cy="200" r="198" fill="white" stroke="#D1D1D1" stroke-width="1"/>
-        <circle cx="200" cy="200" r="195" fill="none" stroke="#F0F0F0" stroke-width="4"/>
+        <circle cx="200" cy="200" r="198" fill="#F0F0F0" />
+        <circle cx="200" cy="200" r="194" fill="white" />
         
-        <path d="M 5,200 A 195,195 0 0 1 395,200 L 200,200 Z" fill="var(--mint-green)" />
-        <path d="M 5,200 A 195,195 0 0 0 395,200 L 200,200 Z" fill="var(--bg-white)" />
+        <path d="M 6,200 A 194,194 0 0 1 394,200 L 200,200 Z" fill="var(--mint-green)" />
+        <path d="M 6,200 A 194,194 0 0 0 394,200 L 200,200 Z" fill="var(--pure-white)" />
 
-        <g id="ticks"></g>
-        <g id="numbers"></g>
+        <g id="dial-elements"></g>
 
-        <g transform="translate(200, 285)">
-            <text text-anchor="middle" font-size="16" font-weight="500" fill="#555" y="-20">Study with</text>
-            <text text-anchor="middle" font-size="28" font-weight="800" fill="var(--text-main)" letter-spacing="-0.5">Sonochiii</text>
-            <text text-anchor="middle" font-size="10" fill="#888" y="15">~ Every Moment Matters ~</text>
+        <g transform="translate(200, 290)">
+            <text text-anchor="middle" font-size="14" font-weight="500" fill="#666" y="-22">Study with</text>
+            <text text-anchor="middle" font-size="26" font-weight="900" fill="var(--clock-black)" letter-spacing="-0.5">Sonochiii</text>
+            <text text-anchor="middle" font-size="10" fill="#999" y="14">~ Every Moment Matters ~</text>
         </g>
 
-        <g id="clock-hands">
-            <line id="h-hand" x1="200" y1="200" x2="200" y2="110" stroke="var(--text-main)" stroke-width="7" />
-            <line id="m-hand" x1="200" y1="200" x2="200" y2="60" stroke="var(--text-main)" stroke-width="4" />
-            <line id="s-hand" x1="200" y1="200" x2="200" y2="45" stroke="var(--accent-red)" stroke-width="1.5" />
-            <circle cx="200" cy="200" r="5" fill="var(--text-main)" />
+        <g id="hands">
+            <line id="hour-hand" x1="200" y1="200" x2="200" y2="120" stroke="var(--clock-black)" stroke-width="7" stroke-linecap="round" />
+            <line id="min-hand" x1="200" y1="200" x2="200" y2="70" stroke="var(--clock-black)" stroke-width="4.5" stroke-linecap="round" />
+            <line id="sec-hand" x1="200" y1="200" x2="200" y2="50" stroke="var(--second-red)" stroke-width="1.5" stroke-linecap="round" />
+            <circle cx="200" cy="200" r="4.5" fill="var(--clock-black)" />
+            <circle cx="200" cy="200" r="1.5" fill="#666" />
         </g>
     </svg>
 </div>
 
 <script>
-    const ticksG = document.getElementById('ticks');
-    const numsG = document.getElementById('numbers');
+    const dial = document.getElementById('dial-elements');
 
-    // 1. 分・秒の目盛り（60分割）
+    // 1. 分・秒ドットと外周数字 (イラストに忠実に配置)
     for (let i = 0; i < 60; i++) {
         const angle = i * 6;
         const rad = (angle - 90) * (Math.PI / 180);
         const isFive = i % 5 === 0;
         
+        // 目盛り線
         const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        const rOut = 195;
-        const rIn = isFive ? 178 : 185;
-        
-        line.setAttribute("x1", 200 + rOut * Math.cos(rad));
-        line.setAttribute("y1", 200 + rOut * Math.sin(rad));
-        line.setAttribute("x2", 200 + rIn * Math.cos(rad));
-        line.setAttribute("y2", 200 + rIn * Math.sin(rad));
+        const rStart = 194;
+        const rEnd = isFive ? 182 : 188;
+        line.setAttribute("x1", 200 + rStart * Math.cos(rad));
+        line.setAttribute("y1", 200 + rStart * Math.sin(rad));
+        line.setAttribute("x2", 200 + rEnd * Math.cos(rad));
+        line.setAttribute("y2", 200 + rEnd * Math.sin(rad));
         line.setAttribute("stroke", "#333");
-        line.setAttribute("stroke-width", isFive ? 2.5 : 1);
-        ticksG.appendChild(line);
+        line.setAttribute("stroke-width", isFive ? "2" : "0.8");
+        dial.appendChild(line);
 
-        // 外周の分数字 (00, 05...)
+        // 外周の分数字 (00, 05, 10...)
         if (isFive) {
             const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            const rText = 165;
+            const rText = 172;
             txt.setAttribute("x", 200 + rText * Math.cos(rad));
             txt.setAttribute("y", 200 + rText * Math.sin(rad) + 4);
             txt.setAttribute("text-anchor", "middle");
-            txt.setAttribute("font-size", "11");
-            txt.setAttribute("fill", "#666");
+            txt.setAttribute("font-size", "10");
+            txt.setAttribute("font-weight", "500");
+            txt.setAttribute("fill", "#555");
             txt.textContent = i.toString().padStart(2, '0');
-            numsG.appendChild(txt);
+            dial.appendChild(txt);
         }
     }
 
-    // 2. 24時間の時間数字
+    // 2. 24時間表記のメイン数字
     for (let i = 0; i < 24; i++) {
         const angle = i * 15;
         const rad = (angle - 90) * (Math.PI / 180);
         const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        const rText = 135;
+        const rText = 145; // 外周寄りに配置
         
         txt.setAttribute("x", 200 + rText * Math.cos(rad));
         txt.setAttribute("y", 200 + rText * Math.sin(rad) + 8);
         txt.setAttribute("text-anchor", "middle");
-        txt.setAttribute("font-size", "24");
+        txt.setAttribute("font-size", "22");
         txt.setAttribute("font-weight", "700");
-        txt.setAttribute("fill", "var(--text-main)");
+        txt.setAttribute("fill", "var(--clock-black)");
         txt.textContent = i === 0 ? "24" : i;
-        numsG.appendChild(txt);
+        dial.appendChild(txt);
     }
 
-    function tick() {
+    // 3. アナログな動きを実現する関数
+    function render() {
         const now = new Date();
-        const s = now.getSeconds() + now.getMilliseconds() / 1000;
+        const ms = now.getMilliseconds();
+        const s = now.getSeconds() + ms / 1000;
         const m = now.getMinutes() + s / 60;
         const h = now.getHours() + m / 60;
 
-        // 24時間計：短針は1時間に15度(360/24)回転
-        document.getElementById('s-hand').setAttribute("transform", `rotate(${s * 6}, 200, 200)`);
-        document.getElementById('m-hand').setAttribute("transform", `rotate(${m * 6}, 200, 200)`);
-        document.getElementById('h-hand').setAttribute("transform", `rotate(${h * 15}, 200, 200)`);
+        // 秒針：1秒間に6度回転、スイープ運針
+        document.getElementById('sec-hand').setAttribute("transform", `rotate(${s * 6}, 200, 200)`);
+        // 長針：1分間に6度回転
+        document.getElementById('min-hand').setAttribute("transform", `rotate(${m * 6}, 200, 200)`);
+        // 短針：1時間に15度(360/24)回転
+        document.getElementById('hour-hand').setAttribute("transform", `rotate(${h * 15}, 200, 200)`);
         
-        requestAnimationFrame(tick);
+        requestAnimationFrame(render);
     }
-    tick();
+    render();
 </script>
 </body>
 </html>
