@@ -4,38 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sonochiii Intelligent 24h Clock</title>
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Sonochiii%20Clock%22,%22short_name%22:%22Sonochiii%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23ffffff%22,%22theme_color%22:%22%23B2E2D2%22}">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800&display=swap');
-
-        body {
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: #fdfdfd;
-            font-family: 'M PLUS Rounded 1c', sans-serif;
-            overflow: hidden;
-        }
-
-        #clock-container {
-            width: 95vmin;
-            height: 95vmin;
-            max-width: 750px;
-            max-height: 750px;
-            position: relative;
-        }
-
-        svg { width: 100%; height: 100%; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1)); }
-
+        body { margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; background: #fdfdfd; font-family: 'M PLUS Rounded 1c', sans-serif; overflow: hidden; }
+        #clock-container { width: 92vmin; height: 92vmin; max-width: 700px; max-height: 700px; }
+        svg { width: 100%; height: 100%; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.08)); }
         .mint-bg { fill: #B2E2D2; transition: fill 3s ease; }
         .white-bg { fill: #ffffff; }
         .text-hour { font-size: 42px; font-weight: 800; fill: #1a1a1a; text-anchor: middle; }
         .text-min { font-size: 20px; font-weight: 700; fill: #888; text-anchor: middle; }
         .logo-text { font-size: 32px; font-weight: 800; fill: #333; text-anchor: middle; }
-        .hand { stroke-linecap: round; transition: stroke 1s; }
-        
         #status-msg { font-size: 18px; font-weight: 700; fill: #666; text-anchor: middle; }
+        .hand { stroke-linecap: round; }
     </style>
 </head>
 <body>
@@ -46,17 +27,13 @@
             <clipPath id="top-clip"><rect x="0" y="0" width="800" height="400" /></clipPath>
             <clipPath id="bottom-clip"><rect x="0" y="400" width="800" height="400" /></clipPath>
         </defs>
-        
         <circle cx="400" cy="400" r="380" id="bg-color" class="mint-bg" clip-path="url(#top-clip)" />
         <circle cx="400" cy="400" r="380" class="white-bg" clip-path="url(#bottom-clip)" />
-        <circle cx="400" cy="400" r="380" fill="none" stroke="#e0e0e0" stroke-width="8" />
-
+        <circle cx="400" cy="400" r="380" fill="none" stroke="#eeeeee" stroke-width="6" />
         <g id="dial-marks"></g>
-
         <text x="400" y="650" class="logo-text">Study with</text>
         <text x="400" y="700" class="logo-text">Sonochilii</text>
         <text x="400" y="550" id="status-msg"></text>
-
         <g id="hands">
             <line id="hour-hand" x1="400" y1="400" x2="400" y2="230" stroke="#333" stroke-width="16" class="hand" />
             <line id="min-hand" x1="400" y1="400" x2="400" y2="120" stroke="#333" stroke-width="10" class="hand" />
@@ -68,84 +45,75 @@
 </div>
 
 <script>
+    // 1. Service Workerの即時実行（インライン化）
+    if ('serviceWorker' in navigator) {
+        const swCode = `
+            self.addEventListener('install', (e) => self.skipWaiting());
+            self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request)));
+        `;
+        const blob = new Blob([swCode], { type: 'text/javascript' });
+        navigator.serviceWorker.register(URL.createObjectURL(blob));
+    }
+
+    // 2. 盤面描画
     const dialMarks = document.getElementById('dial-marks');
     const svgNS = "http://www.w3.org/2000/svg";
 
-    // 盤面の描画（イラストの正確なインデックス配置）
     for (let i = 0; i < 60; i++) {
-        const angle = i * 6; // 6度ずつ（秒・分用）
-        const rad = (angle - 90) * (Math.PI / 180);
-        
-        if (i % 5 === 0) { // 5分/2時間おき
-            const hourVal = (i / 60) * 24;
-            const displayH = hourVal === 0 ? "24" : hourVal;
-            const minStr = i.toString().padStart(2, '0');
-
-            // 外側の分（00, 05, 10...）
-            addText(400 + 350 * Math.cos(rad), 400 + 350 * Math.sin(rad) + 7, minStr, 'text-min');
-            // 目盛り
-            addLine(400 + 325 * Math.cos(rad), 400 + 325 * Math.sin(rad), 
-                    400 + 290 * Math.cos(rad), 400 + 290 * Math.sin(rad), '#444', 6);
-            // 内側の時間（24, 2, 4...）
-            addText(400 + 240 * Math.cos(rad), 400 + 240 * Math.sin(rad) + 15, displayH, 'text-hour');
+        const rad = (i * 6 - 90) * (Math.PI / 180);
+        if (i % 5 === 0) {
+            const h = (i / 60) * 24 || 24;
+            const m = i.toString().padStart(2, '0');
+            addText(400 + 350 * Math.cos(rad), 400 + 350 * Math.sin(rad) + 7, m, 'text-min');
+            addLine(400 + 325 * Math.cos(rad), 400 + 325 * Math.sin(rad), 400 + 295 * Math.cos(rad), 400 + 295 * Math.sin(rad), '#444', 6);
+            addText(400 + 245 * Math.cos(rad), 400 + 245 * Math.sin(rad) + 15, h, 'text-hour');
         } else {
-            // 小さな目盛り（ドットではなく線で視認性向上）
-            addLine(400 + 325 * Math.cos(rad), 400 + 325 * Math.sin(rad), 
-                    400 + 310 * Math.cos(rad), 400 + 310 * Math.sin(rad), '#bbb', 3);
+            addLine(400 + 325 * Math.cos(rad), 400 + 325 * Math.sin(rad), 400 + 312 * Math.cos(rad), 400 + 312 * Math.sin(rad), '#bbb', 3);
         }
     }
 
     function addText(x, y, txt, cls) {
         const t = document.createElementNS(svgNS, "text");
-        t.setAttribute("x", x); t.setAttribute("y", y);
-        t.setAttribute("class", cls);
-        t.textContent = txt;
-        dialMarks.appendChild(t);
+        t.setAttribute("x", x); t.setAttribute("y", y); t.setAttribute("class", cls);
+        t.textContent = txt; dialMarks.appendChild(t);
     }
 
     function addLine(x1, y1, x2, y2, color, width) {
         const l = document.createElementNS(svgNS, "line");
-        l.setAttribute("x1", x1); l.setAttribute("y1", y1);
-        l.setAttribute("x2", x2); l.setAttribute("y2", y2);
-        l.setAttribute("stroke", color); l.setAttribute("stroke-width", width);
-        l.setAttribute("stroke-linecap", "round");
+        l.setAttribute("x1", x1); l.setAttribute("y1", y1); l.setAttribute("x2", x2); l.setAttribute("y2", y2);
+        l.setAttribute("stroke", color); l.setAttribute("stroke-width", width); l.setAttribute("stroke-linecap", "round");
         dialMarks.appendChild(l);
     }
 
-    function updateClock() {
+    // 3. アニメーション & ロジック
+    function update() {
         const now = new Date();
-        const ms = now.getMilliseconds();
-        const s = now.getSeconds() + ms / 1000;
+        const s = now.getSeconds() + now.getMilliseconds() / 1000;
         const m = now.getMinutes() + s / 60;
         const h = now.getHours() + m / 60;
 
-        // 秒針・分針は通常の時計と同じ（1周60単位）
         document.getElementById('sec-hand').setAttribute('transform', `rotate(${s * 6}, 400, 400)`);
         document.getElementById('min-hand').setAttribute('transform', `rotate(${m * 6}, 400, 400)`);
-        // 時針は24時間で1周（360 / 24 = 15度/時）
         document.getElementById('hour-hand').setAttribute('transform', `rotate(${h * 15}, 400, 400)`);
 
-        // 教育・治験向け：時間帯による環境最適化
         const hr = now.getHours();
-        const bgColor = document.getElementById('bg-color');
-        const statusMsg = document.getElementById('status-msg');
+        const bg = document.getElementById('bg-color');
+        const msg = document.getElementById('status-msg');
 
         if (hr >= 6 && hr < 15) {
-            bgColor.style.fill = "#B2E2D2"; // 集中力を高めるミント
-            statusMsg.textContent = "学習タイム：光を浴びて脳を活性化しましょう";
+            bg.style.fill = "#B2E2D2";
+            msg.textContent = "Study with Sonochiii 配信中 ♪";
         } else if (hr >= 15 && hr < 21) {
-            bgColor.style.fill = "#FFEBCC"; // リラックスのオレンジ
-            statusMsg.textContent = "夕食とリラックス：入眠の準備を始めましょう";
+            bg.style.fill = "#FFEBCC";
+            msg.textContent = "夕食とリラックスの時間です";
         } else {
-            bgColor.style.fill = "#2C3E50"; // 深い眠りを誘うネイビー
-            statusMsg.textContent = "消灯タイム：ブルーライトを避けて休息を";
-            statusMsg.style.fill = "#ecf0f1";
+            bg.style.fill = "#2C3E50";
+            msg.textContent = "穏やかな眠りのために、画面を閉じましょう";
+            msg.style.fill = "#ecf0f1";
         }
-        
-        requestAnimationFrame(updateClock);
+        requestAnimationFrame(update);
     }
-
-    updateClock();
+    update();
 </script>
 </body>
 </html>
