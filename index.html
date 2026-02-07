@@ -3,19 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonochiii Intelligent 24h Clock</title>
+    <title>Sonochiii Intelligent 24h Clock v2</title>
     <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Sonochiii%20Clock%22,%22short_name%22:%22Sonochiii%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23ffffff%22,%22theme_color%22:%22%23B2E2D2%22}">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800&display=swap');
         body { margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; background: #fdfdfd; font-family: 'M PLUS Rounded 1c', sans-serif; overflow: hidden; }
-        #clock-container { width: 92vmin; height: 92vmin; max-width: 700px; max-height: 700px; }
+        #clock-container { width: 92vmin; height: 92vmin; max-width: 700px; max-height: 700px; position: relative; }
         svg { width: 100%; height: 100%; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.08)); }
+        
+        /* 状態変化のスタイル */
         .mint-bg { fill: #B2E2D2; transition: fill 3s ease; }
         .white-bg { fill: #ffffff; }
         .text-hour { font-size: 42px; font-weight: 800; fill: #1a1a1a; text-anchor: middle; }
         .text-min { font-size: 20px; font-weight: 700; fill: #888; text-anchor: middle; }
-        .logo-text { font-size: 32px; font-weight: 800; fill: #333; text-anchor: middle; }
-        #status-msg { font-size: 18px; font-weight: 700; fill: #666; text-anchor: middle; }
+        .logo-text { font-size: 34px; font-weight: 800; fill: #222; text-anchor: middle; }
+        
+        /* 上部メッセージエリアの最適化 */
+        .msg-box { fill: rgba(255, 255, 255, 0.7); stroke: rgba(0,0,0,0.05); stroke-width: 1; }
+        #status-msg { font-size: 19px; font-weight: 700; fill: #444; text-anchor: middle; }
         .hand { stroke-linecap: round; }
     </style>
 </head>
@@ -27,13 +32,19 @@
             <clipPath id="top-clip"><rect x="0" y="0" width="800" height="400" /></clipPath>
             <clipPath id="bottom-clip"><rect x="0" y="400" width="800" height="400" /></clipPath>
         </defs>
+        
         <circle cx="400" cy="400" r="380" id="bg-color" class="mint-bg" clip-path="url(#top-clip)" />
         <circle cx="400" cy="400" r="380" class="white-bg" clip-path="url(#bottom-clip)" />
         <circle cx="400" cy="400" r="380" fill="none" stroke="#eeeeee" stroke-width="6" />
+
+        <rect x="250" y="270" width="300" height="65" rx="15" class="msg-box" />
+        <text x="400" y="310" id="status-msg">Loading...</text>
+
         <g id="dial-marks"></g>
-        <text x="400" y="650" class="logo-text">Study with</text>
-        <text x="400" y="700" class="logo-text">Sonochilii</text>
-        <text x="400" y="550" id="status-msg"></text>
+
+        <text x="400" y="660" class="logo-text">Study with</text>
+        <text x="400" y="710" class="logo-text">Sonochilii</text>
+
         <g id="hands">
             <line id="hour-hand" x1="400" y1="400" x2="400" y2="230" stroke="#333" stroke-width="16" class="hand" />
             <line id="min-hand" x1="400" y1="400" x2="400" y2="120" stroke="#333" stroke-width="10" class="hand" />
@@ -45,20 +56,17 @@
 </div>
 
 <script>
-    // 1. Service Workerの即時実行（インライン化）
+    // Service Worker のインライン登録
     if ('serviceWorker' in navigator) {
-        const swCode = `
-            self.addEventListener('install', (e) => self.skipWaiting());
-            self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request)));
-        `;
-        const blob = new Blob([swCode], { type: 'text/javascript' });
+        const sw = `self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));`;
+        const blob = new Blob([sw], { type: 'text/javascript' });
         navigator.serviceWorker.register(URL.createObjectURL(blob));
     }
 
-    // 2. 盤面描画
     const dialMarks = document.getElementById('dial-marks');
     const svgNS = "http://www.w3.org/2000/svg";
 
+    // 盤面生成
     for (let i = 0; i < 60; i++) {
         const rad = (i * 6 - 90) * (Math.PI / 180);
         if (i % 5 === 0) {
@@ -85,7 +93,6 @@
         dialMarks.appendChild(l);
     }
 
-    // 3. アニメーション & ロジック
     function update() {
         const now = new Date();
         const s = now.getSeconds() + now.getMilliseconds() / 1000;
@@ -100,16 +107,17 @@
         const bg = document.getElementById('bg-color');
         const msg = document.getElementById('status-msg');
 
+        // スケジュールに合わせた色の変化
         if (hr >= 6 && hr < 15) {
             bg.style.fill = "#B2E2D2";
-            msg.textContent = "Study with Sonochiii 配信中 ♪";
+            msg.textContent = "Study with Sonochiii 配信中";
         } else if (hr >= 15 && hr < 21) {
             bg.style.fill = "#FFEBCC";
-            msg.textContent = "夕食とリラックスの時間です";
+            msg.textContent = "復習とリラックスの時間";
         } else {
             bg.style.fill = "#2C3E50";
-            msg.textContent = "穏やかな眠りのために、画面を閉じましょう";
-            msg.style.fill = "#ecf0f1";
+            msg.textContent = "明日のために休みましょう";
+            msg.style.fill = "#fff"; // 夜間は文字を白く
         }
         requestAnimationFrame(update);
     }
