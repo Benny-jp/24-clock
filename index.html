@@ -1,103 +1,209 @@
 <!DOCTYPE html>
+
 <html lang="ja">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study with Sonochiii | Professional 24H Clock</title>
+
+    <title>Study with Sonochiii - Dual Tone 24H Clock</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
+
     <style>
+
         :root {
-            --mint-green: #B2E2C9;
-            --night-navy: rgba(27, 38, 59, 0.65); /* 視認性を確保した紺 */
-            --gold-rim: linear-gradient(135deg, #d4af37 0%, #fcf6ba 45%, #b8860b 100%);
-            --text-black: #1a1a1a;
+
+            --mint-green: #B2E2D2;
+
+            --logo-black: #2c2c2c; /* 少しだけ柔らかい黒 */
+
+            --clock-size: 500px;
+
         }
-        body { margin: 0; background: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        .clock-box { width: 98vmin; height: 98vmin; max-width: 800px; max-height: 800px; }
-        svg { width: 100%; height: 100%; overflow: visible; }
-    </style>
-</head>
-<body>
-<div class="clock-box">
-    <svg viewBox="0 0 400 400">
-        <defs>
-            <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d4af37"/><stop offset="50%" stop-color="#fcf6ba"/><stop offset="100%" stop-color="#b8860b"/></linearGradient>
-        </defs>
-        <circle cx="200" cy="200" r="198" fill="url(#gold)" />
-        <circle cx="200" cy="200" r="192" fill="white" />
+
+        body {
+
+            display: flex; justify-content: center; align-items: center;
+
+            height: 100vh; margin: 0; background-color: #eee;
+
+        }
+
+        .clock {
+
+            width: var(--clock-size); height: var(--clock-size);
+
+            background: linear-gradient(to right, #ffffff 50%, var(--mint-green) 50%);
+
+            border: 12px solid #fff; border-radius: 50%;
+
+            position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+
+        }
+
+        .logo {
+
+            position: absolute; 
+
+            top: 66%; /* 改行に合わせて位置を微調整 */
+
+            width: 100%;
+
+            text-align: center; 
+
+            font-weight: 900; 
+
+            font-size: 1.3rem; 
+
+            line-height: 1.2; /* 行間を詰めて一体感を出す */
+
+            color: var(--logo-black); 
+
+            font-family: 'Zen Maru Gothic', sans-serif;
+
+            letter-spacing: 0.02em;
+
+            z-index: 15;
+
+            filter: drop-shadow(0 0 2px rgba(255,255,255,0.8)); /* 視認性UP */
+
+        }
+
+        .logo span { font-size: 1.5rem; } /* Sonochiiiを少し大きく */
+
         
-        <path id="night-sector" d="M 8,200 A 192,192 0 0 1 392,200 L 200,200 Z" fill="var(--mint-green)" />
-        <path d="M 8,200 A 192,192 0 0 0 392,200 L 200,200 Z" fill="white" />
 
-        <g id="dial"></g>
+        /* 以下、時計の基本構造（変更なし） */
 
-        <text x="200" y="295" text-anchor="middle" font-size="28" font-weight="900" fill="var(--text-black)">Sonochiii</text>
+        .marker { position: absolute; width: 100%; height: 100%; text-align: center; color: #333; font-family: 'Zen Maru Gothic', sans-serif; }
 
-        <g id="hands">
-            <line id="h-ptr" x1="200" y1="200" x2="200" y2="155" stroke="var(--text-black)" stroke-width="8" stroke-linecap="round" />
-            <line id="m-ptr" x1="200" y1="200" x2="200" y2="80" stroke="var(--text-black)" stroke-width="4" stroke-linecap="round" />
-            <line id="s-ptr" x1="200" y1="200" x2="200" y2="45" stroke="#d00" stroke-width="1.5" stroke-linecap="round" />
-            <circle cx="200" cy="200" r="5" fill="var(--text-black)" />
-        </g>
-    </svg>
+        .hour-num { font-size: 1.6rem; font-weight: 700; padding: 40px; box-sizing: border-box; }
+
+        .min-num { font-size: 0.85rem; font-weight: 500; padding: 10px; box-sizing: border-box; }
+
+        .tick { position: absolute; width: 2px; height: 5px; background: #333; left: 50%; transform-origin: 0 250px; }
+
+        .dot { position: absolute; width: 4px; height: 4px; background: #999; border-radius: 50%; left: 50%; transform-origin: 0 250px; }
+
+        .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 4px; background: #222; }
+
+        .hour-hand { width: 8px; height: 130px; z-index: 10; }
+
+        .minute-hand { width: 5px; height: 180px; z-index: 11; background: #444; }
+
+        .second-hand { width: 2px; height: 210px; z-index: 12; background: #ff4757; }
+
+        .center-dot { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; background: #222; border-radius: 50%; transform: translate(-50%, -50%); z-index: 20; }
+
+    </style>
+
+</head>
+
+<body>
+
+
+
+<div class="clock" id="clock">
+
+    <div class="logo">Study with<br><span>Sonochiii</span></div>
+
+    <div class="center-dot"></div>
+
+    <div class="hand hour-hand" id="hour"></div>
+
+    <div class="hand minute-hand" id="minute"></div>
+
+    <div class="hand second-hand" id="second"></div>
+
 </div>
 
-<script>
-    const dial = document.getElementById('dial');
-    const nightSector = document.getElementById('night-sector');
 
-    // 文字盤生成
-    for (let i = 0; i < 60; i++) {
-        const rad = (i * 6 - 90) * Math.PI / 180;
-        // 外周ドット
-        if (i % 5 === 0) {
-            const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            txt.setAttribute("x", 200 + 178 * Math.cos(rad));
-            txt.setAttribute("y", 200 + 178 * Math.sin(rad) + 4);
-            txt.setAttribute("text-anchor", "middle");
-            txt.setAttribute("font-size", "10");
-            txt.textContent = i.toString().padStart(2, '0');
-            dial.appendChild(txt);
-        }
-        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        const rIn = (i % 5 === 0) ? 184 : 188;
-        line.setAttribute("x1", 200 + 192 * Math.cos(rad));
-        line.setAttribute("y1", 200 + 192 * Math.sin(rad));
-        line.setAttribute("x2", 200 + rIn * Math.cos(rad));
-        line.setAttribute("y2", 200 + rIn * Math.sin(rad));
-        line.setAttribute("stroke", "#333");
-        line.setAttribute("stroke-width", (i % 5 === 0) ? 2 : 0.5);
-        dial.appendChild(line);
+
+<script>
+
+    const clock = document.getElementById('clock');
+
+    for (let i = 1; i <= 24; i++) {
+
+        const hWrap = document.createElement('div');
+
+        hWrap.className = 'marker hour-num';
+
+        const rotation = i * 15;
+
+        hWrap.style.transform = `rotate(${rotation}deg)`;
+
+        hWrap.innerHTML = `<span style="display:inline-block; transform:rotate(-${rotation}deg)">${i}</span>`;
+
+        clock.appendChild(hWrap);
+
+        const tick = document.createElement('div');
+
+        tick.className = 'tick';
+
+        tick.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
+
+        clock.appendChild(tick);
+
     }
 
-    // 24時間数字：際立たせるための配置とサイズ
-    for (let i = 0; i < 24; i++) {
-        const rad = (i * 15 - 90) * Math.PI / 180;
-        const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        txt.setAttribute("x", 200 + 135 * Math.cos(rad)); // 針が届かない距離
-        txt.setAttribute("y", 200 + 135 * Math.sin(rad) + 9);
-        txt.setAttribute("text-anchor", "middle");
-        txt.setAttribute("font-size", "26");
-        txt.setAttribute("font-weight", "800");
-        txt.textContent = i === 0 ? "24" : i;
-        dial.appendChild(txt);
+    for (let i = 0; i < 60; i++) {
+
+        const rotation = i * 6;
+
+        if (i % 5 === 0) {
+
+            const mWrap = document.createElement('div');
+
+            mWrap.className = 'marker min-num';
+
+            mWrap.style.transform = `rotate(${rotation}deg)`;
+
+            const label = i === 0 ? '00' : i.toString().padStart(2, '0');
+
+            mWrap.innerHTML = `<span style="display:inline-block; transform:rotate(-${rotation}deg)">${label}</span>`;
+
+            clock.appendChild(mWrap);
+
+        } else {
+
+            const dot = document.createElement('div');
+
+            dot.className = 'dot';
+
+            dot.style.transform = `translateX(-50%) rotate(${rotation}deg) translateY(5px)`;
+
+            clock.appendChild(dot);
+
+        }
+
     }
 
     function update() {
+
         const now = new Date();
-        const hr = now.getHours();
-        const s = now.getSeconds() + now.getMilliseconds() / 1000;
-        const m = now.getMinutes() + s / 60;
-        const h = hr + m / 60;
 
-        // 21:00〜6:00の紺色変化
-        nightSector.setAttribute("fill", (hr >= 21 || hr < 6) ? "var(--night-navy)" : "var(--mint-green)");
+        const s = now.getSeconds(); const m = now.getMinutes(); const h = now.getHours();
 
-        document.getElementById('s-ptr').setAttribute("transform", `rotate(${s * 6}, 200, 200)`);
-        document.getElementById('m-ptr').setAttribute("transform", `rotate(${m * 6}, 200, 200)`);
-        document.getElementById('h-ptr').setAttribute("transform", `rotate(${h * 15}, 200, 200)`);
-        requestAnimationFrame(update);
+        const sDeg = (s / 60) * 360;
+
+        const mDeg = (m / 60) * 360 + (s / 60) * 6;
+
+        const hDeg = (h / 24) * 360 + (m / 60) * 15;
+
+        document.getElementById('second').style.transform = `translateX(-50%) rotate(${sDeg}deg)`;
+
+        document.getElementById('minute').style.transform = `translateX(-50%) rotate(${mDeg}deg)`;
+
+        document.getElementById('hour').style.transform = `translateX(-50%) rotate(${hDeg}deg)`;
+
     }
-    update();
+
+    setInterval(update, 1000); update();
+
 </script>
+
 </body>
+
 </html>
