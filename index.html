@@ -2,138 +2,120 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonochiii Master Clock 24h</title>
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Sonochiii%20Clock%22,%22short_name%22:%22Sonochiii%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23ffffff%22,%22theme_color%22:%22%23B2E2D2%22}">
+    <title>Study with Sonochilii 24h Clock</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800&display=swap');
-        body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #fdfdfd; font-family: 'M PLUS Rounded 1c', sans-serif; overflow: hidden; }
-        #clock-container { width: 95vmin; height: 95vmin; max-width: 750px; position: relative; }
-        svg { width: 100%; height: 100%; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.1)); }
+        :root {
+            --bg-color: #f0f0f0;
+            --mint-green: #B2E2C9;
+            --clock-size: 500px;
+        }
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--bg-color); margin: 0; font-family: sans-serif; }
         
-        .mint-bg { fill: #B2E2D2; transition: fill 3s; }
-        .night-bg { fill: #2C3E50; transition: fill 3s; }
-        .white-bg { fill: #ffffff; }
+        .clock {
+            width: var(--clock-size); height: var(--clock-size);
+            border-radius: 50%; background: white;
+            border: 15px solid #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1), inset 0 0 10px rgba(0,0,0,0.2);
+            position: relative; overflow: hidden;
+        }
+
+        /* 背景の塗り分け */
+        .clock::before {
+            content: ''; position: absolute; top: 0; width: 100%; height: 50%;
+            background: var(--mint-green); border-bottom: 1px solid #ddd;
+        }
+
+        /* 文字盤の数字と目盛り */
+        .face-container { position: absolute; width: 100%; height: 100%; }
+        .mark { position: absolute; width: 100%; height: 100%; text-align: center; }
         
-        /* 破綻のないフォント・サイズ設計 */
-        .text-hour { font-size: 38px; font-weight: 800; fill: #111; text-anchor: middle; }
-        .text-min { font-size: 18px; font-weight: 700; fill: #999; text-anchor: middle; }
-        .logo-study { font-size: 24px; font-weight: 700; fill: #444; text-anchor: middle; }
-        .logo-main { font-size: 48px; font-weight: 800; fill: #111; text-anchor: middle; }
-        
-        .msg-box { fill: rgba(255, 255, 255, 0.9); }
-        #status-msg { font-size: 19px; font-weight: 800; fill: #222; text-anchor: middle; }
-        .hand { stroke-linecap: round; }
+        /* 数字のスタイル */
+        .hour-label { position: absolute; width: 100%; height: 100%; font-weight: bold; font-size: 24px; top: 10px; }
+        .min-label { position: absolute; width: 100%; height: 100%; font-size: 14px; top: -15px; color: #555; }
+
+        /* 針のスタイル */
+        .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 4px; }
+        .hour-hand { width: 8px; height: 100px; background: #333; z-index: 3; }
+        .min-hand { width: 6px; height: 160px; background: #333; z-index: 2; }
+        .sec-hand { width: 2px; height: 180px; background: #d00; z-index: 4; }
+        .center-dot { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; background: #333; border-radius: 50%; transform: translate(-50%, -50%); z-index: 5; }
+
+        /* ロゴ */
+        .logo {
+            position: absolute; width: 100%; text-align: center; top: 65%;
+            font-weight: bold; font-size: 22px; line-height: 1.2; z-index: 1;
+        }
     </style>
 </head>
 <body>
 
-<div id="clock-container">
-    <svg viewBox="0 0 800 800">
-        <defs>
-            <clipPath id="top-clip"><rect x="0" y="0" width="800" height="400" /></clipPath>
-            <clipPath id="bottom-clip"><rect x="0" y="400" width="800" height="400" /></clipPath>
-        </defs>
-        
-        <circle cx="400" cy="400" r="385" id="bg-color" class="mint-bg" clip-path="url(#top-clip)" />
-        <circle cx="400" cy="400" r="385" class="white-bg" clip-path="url(#bottom-clip)" />
-        <circle cx="400" cy="400" r="385" fill="none" stroke="#ddd" stroke-width="2" />
-
-        <g id="dial-marks"></g>
-
-        <rect x="200" y="270" width="400" height="60" rx="30" class="msg-box" />
-        <text x="400" y="308" id="status-msg">Loading...</text>
-        
-        <text x="400" y="520" class="logo-study">Study with</text>
-        <text x="400" y="580" class="logo-main">Sonochilii</text>
-
-        <g id="hands">
-            <line id="hour-hand" x1="400" y1="400" x2="400" y2="210" stroke="#333" stroke-width="14" class="hand" />
-            <line id="min-hand" x1="400" y1="400" x2="400" y2="100" stroke="#333" stroke-width="8" class="hand" />
-            <line id="sec-hand" x1="400" y1="400" x2="400" y2="70" stroke="#ff4560" stroke-width="3" class="hand" />
-            <circle cx="400" cy="400" r="12" fill="#333" />
-        </g>
-    </svg>
+<div class="clock">
+    <div class="face-container" id="face"></div>
+    <div class="logo">Study with<br>Sonochilii</div>
+    <div class="hand hour-hand" id="hourHand"></div>
+    <div class="hand min-hand" id="minHand"></div>
+    <div class="hand sec-hand" id="secHand"></div>
+    <div class="center-dot"></div>
 </div>
 
 <script>
-    // PWA Service Worker
-    if ('serviceWorker' in navigator) {
-        const sw = `self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));`;
-        const blob = new Blob([sw], { type: 'text/javascript' });
-        navigator.serviceWorker.register(URL.createObjectURL(blob));
-    }
+    const face = document.getElementById('face');
 
-    const dialMarks = document.getElementById('dial-marks');
-    const svgNS = "http://www.w3.org/2000/svg";
-
-    // 盤面生成ロジック：イラストの数値を数学的に正しく配置
+    // 文字盤の生成
     for (let i = 0; i < 60; i++) {
-        const rad = (i * 6 - 90) * (Math.PI / 180); // 00分/24時を真上に固定
-        
+        const mark = document.createElement('div');
+        mark.className = 'mark';
+        mark.style.transform = `rotate(${i * 6}deg)`;
+
+        // 目盛り
+        const line = document.createElement('div');
+        line.style.width = '2px';
+        line.style.height = i % 5 === 0 ? '15px' : '8px';
+        line.style.background = '#333';
+        line.style.margin = '0 auto';
+        mark.appendChild(line);
+
+        // 分の数字 (05, 10...)
         if (i % 5 === 0) {
-            // 時間の表示（1目盛り 5分 = 2時間）
-            const hourValue = (i / 60) * 24;
-            const displayH = hourValue === 0 ? "24" : hourValue;
-            const minStr = i.toString().padStart(2, '0');
-
-            // 外側の分 (00, 05, 10...)
-            addText(400 + 355 * Math.cos(rad), 400 + 355 * Math.sin(rad) + 7, minStr, 'text-min');
-            // 太い目盛り
-            addLine(400 + 330 * Math.cos(rad), 400 + 330 * Math.sin(rad), 400 + 295 * Math.cos(rad), 400 + 295 * Math.sin(rad), '#333', 6);
-            // 内側の時間 (24, 2, 4...)
-            addText(400 + 240 * Math.cos(rad), 400 + 240 * Math.sin(rad) + 15, displayH, 'text-hour');
-        } else {
-            // 細い目盛り
-            addLine(400 + 330 * Math.cos(rad), 400 + 330 * Math.sin(rad), 400 + 315 * Math.cos(rad), 400 + 315 * Math.sin(rad), '#bbb', 3);
+            const minNum = document.createElement('div');
+            minNum.className = 'min-label';
+            minNum.innerText = i.toString().padStart(2, '0');
+            minNum.style.transform = `rotate(-${i * 6}deg)`;
+            mark.appendChild(minNum);
         }
+        face.appendChild(mark);
     }
 
-    function addText(x, y, txt, cls) {
-        const t = document.createElementNS(svgNS, "text");
-        t.setAttribute("x", x); t.setAttribute("y", y); t.setAttribute("class", cls);
-        t.textContent = txt; dialMarks.appendChild(t);
+    // 24時間の数字
+    for (let i = 0; i < 24; i++) {
+        const hMark = document.createElement('div');
+        hMark.className = 'mark';
+        hMark.style.transform = `rotate(${i * 15}deg)`;
+        
+        const hNum = document.createElement('div');
+        hNum.className = 'hour-label';
+        hNum.innerText = i === 0 ? '24' : i;
+        hNum.style.transform = `translateY(45px) rotate(-${i * 15}deg)`;
+        hMark.appendChild(hNum);
+        face.appendChild(hMark);
     }
 
-    function addLine(x1, y1, x2, y2, color, width) {
-        const l = document.createElementNS(svgNS, "line");
-        l.setAttribute("x1", x1); l.setAttribute("y1", y1); l.setAttribute("x2", x2); l.setAttribute("y2", y2);
-        l.setAttribute("stroke", color); l.setAttribute("stroke-width", width); l.setAttribute("stroke-linecap", "round");
-        dialMarks.appendChild(l);
-    }
-
-    function update() {
+    function updateClock() {
         const now = new Date();
-        const s = now.getSeconds() + now.getMilliseconds() / 1000;
-        const m = now.getMinutes() + s / 60;
-        const h = now.getHours() + m / 60;
+        const s = now.getSeconds();
+        const m = now.getMinutes();
+        const h = now.getHours();
 
-        // 秒・分は360度/60分
-        document.getElementById('sec-hand').setAttribute('transform', `rotate(${s * 6}, 400, 400)`);
-        document.getElementById('min-hand').setAttribute('transform', `rotate(${m * 6}, 400, 400)`);
-        // 時針は360度/24時間 = 15度/時（ここが破綻の核心）
-        document.getElementById('hour-hand').setAttribute('transform', `rotate(${h * 15}, 400, 400)`);
+        const sDeg = s * 6;
+        const mDeg = m * 6 + s * 0.1;
+        const hDeg = (h % 24) * 15 + m * 0.25; // 360/24 = 15度
 
-        const hr = now.getHours();
-        const bg = document.getElementById('bg-color');
-        const msg = document.getElementById('status-msg');
-
-        // 21:00〜3:00は夜モード
-        if (hr >= 21 || hr < 3) {
-            bg.setAttribute('class', 'night-bg');
-            msg.textContent = "おやすみなさい。良い夢を ✨";
-            msg.style.fill = "#2C3E50";
-        } else {
-            bg.setAttribute('class', 'mint-bg');
-            if (hr >= 6 && hr < 15) {
-                msg.textContent = "Study with Sonochiii 配信中 🎶";
-            } else {
-                msg.textContent = "今日も一緒に歩みましょう ☀️";
-            }
-        }
-        requestAnimationFrame(update);
+        document.getElementById('secHand').style.transform = `translateX(-50%) rotate(${sDeg}deg)`;
+        document.getElementById('minHand').style.transform = `translateX(-50%) rotate(${mDeg}deg)`;
+        document.getElementById('hourHand').style.transform = `translateX(-50%) rotate(${hDeg}deg)`;
     }
-    update();
+
+    setInterval(updateClock, 1000);
+    updateClock();
 </script>
 </body>
 </html>
