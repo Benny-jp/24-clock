@@ -2,12 +2,15 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Study with Sonochiii - 24h Clock</title>
+    <title>Perfect Educational 24h Clock - Sonochiii</title>
     <style>
+        /* 丸みのある可愛いフォントをロード */
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800&display=swap');
+
         :root {
-            --mint-color: #B2E2D2;
-            --bg-color: #F8F9FA;
-            --text-main: #333;
+            --mint-color: #B2E2D2; /* 完璧なミント色 */
+            --font-family: 'M PLUS Rounded 1c', sans-serif;
+            --clock-size: 800px;
         }
 
         body {
@@ -16,173 +19,171 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: var(--bg-color);
-            font-family: 'Arial Rounded MT Bold', 'Helvetica Round', sans-serif;
+            background-color: #f7f7f7;
+            font-family: var(--font-family);
         }
 
-        #clock-container {
+        /* 盤面：上下の色分けを完璧に再現 */
+        #clock-face {
             position: relative;
-            width: 500px;
-            height: 500px;
+            width: var(--clock-size);
+            height: var(--clock-size);
             border-radius: 50%;
             background: linear-gradient(to bottom, var(--mint-color) 50%, #ffffff 50%);
-            border: 15px solid #ffffff;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 18px solid #ffffff;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
         }
 
-        /* 文字と目盛りのレイアウト */
-        .face-element {
+        /* インデックス共通 */
+        .layer {
             position: absolute;
             width: 100%;
             height: 100%;
             display: flex;
             justify-content: center;
-            padding: 10px;
-            box-sizing: border-box;
         }
 
-        /* 24時間表示（内側） */
-        .hour-label {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--text-main);
-        }
-
-        /* 分表示（外側） */
+        /* 外側の「分」の数字：視認性重視 */
         .minute-label {
-            font-size: 14px;
-            font-weight: bold;
+            position: absolute;
+            top: 25px;
+            font-size: 24px;
+            font-weight: 700;
             color: #666;
         }
 
-        /* ドットと目盛り */
-        .tick {
-            width: 3px;
-            height: 12px;
-            background: #333;
-            border-radius: 2px;
-        }
-        .dot {
-            width: 5px;
-            height: 5px;
-            background: #bbb;
+        /* 1分刻みの正確なドット */
+        .minute-dot {
+            position: absolute;
+            top: 70px;
+            width: 8px;
+            height: 8px;
+            background: #ccc;
             border-radius: 50%;
         }
 
-        /* 針のデザイン */
+        /* 5分ごとの太い目盛り */
+        .major-tick {
+            position: absolute;
+            top: 62px;
+            width: 6px;
+            height: 24px;
+            background: #333;
+            border-radius: 3px;
+        }
+
+        /* 内側の「24時間」の数字：大きく丸みのあるデザイン */
+        .hour-label {
+            position: absolute;
+            top: 110px;
+            font-size: 52px;
+            font-weight: 800;
+            color: #222;
+        }
+
+        /* 針：視認性の高い黒（秒針のみ赤） */
         .hand {
             position: absolute;
             bottom: 50%;
             left: 50%;
             transform-origin: bottom center;
-            border-radius: 10px;
+            border-radius: 20px;
             z-index: 10;
         }
-        .hour-hand {
-            width: 10px;
-            height: 120px;
-            background: #000;
-            margin-left: -5px;
-        }
-        .minute-hand {
-            width: 6px;
-            height: 180px;
-            background: #000;
-            margin-left: -3px;
-        }
-        .second-hand {
-            width: 2px;
-            height: 200px;
-            background: #E63946;
-            margin-left: -1px;
-            z-index: 11;
-        }
-        .center-dot {
+        .hour-hand { width: 18px; height: 230px; background: #222; margin-left: -9px; }
+        .min-hand { width: 12px; height: 330px; background: #222; margin-left: -6px; }
+        .sec-hand { width: 4px; height: 360px; background: #ff4560; margin-left: -2px; z-index: 11; }
+
+        /* 中央の軸 */
+        .center-nut {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 16px;
-            height: 16px;
-            background: #333;
-            border: 3px solid #fff;
+            top: 50%; left: 50%;
+            width: 28px; height: 28px;
+            background: #222;
+            border: 5px solid #fff;
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            z-index: 12;
+            z-index: 20;
         }
 
-        /* ロゴ */
-        .logo {
+        /* ロゴ：白いエリアの垂直・水平中央に配置 */
+        .logo-box {
             position: absolute;
-            bottom: 22%;
+            bottom: 18%; /* 白いエリアの中央に調整 */
             width: 100%;
             text-align: center;
-            line-height: 1.2;
+            line-height: 1.1;
         }
-        .logo-study { font-size: 20px; font-weight: normal; }
-        .logo-name { font-size: 28px; font-weight: bold; }
+        .study-with { font-size: 34px; font-weight: 700; }
+        .sonochiii { font-size: 60px; font-weight: 800; letter-spacing: -1px; }
     </style>
 </head>
 <body>
 
-<div id="clock-container">
-    <div id="clock-face"></div>
-    <div class="logo">
-        <div class="logo-study">Study with</div>
-        <div class="logo-name">Sonochiii</div>
-    </div>
+<div id="clock-face">
+    <div id="marks-container"></div>
     
-    <div class="hand hour-hand" id="hour"></div>
-    <div class="hand minute-hand" id="minute"></div>
-    <div class="hand second-hand" id="second"></div>
-    <div class="center-dot"></div>
+    <div class="logo-box">
+        <div class="study-with">Study with</div>
+        <div class="sonochiii">Sonochiii</div>
+    </div>
+
+    <div class="hand hour-hand" id="h-hand"></div>
+    <div class="hand min-hand" id="m-hand"></div>
+    <div class="hand sec-hand" id="s-hand"></div>
+    <div class="center-nut"></div>
 </div>
 
 <script>
-    const face = document.getElementById('clock-face');
+    const container = document.getElementById('marks-container');
 
-    // 目盛りと数字の生成
+    // 盤面の構築（1分刻み、計60個のレイヤー）
     for (let i = 0; i < 60; i++) {
-        const angle = i * 6;
-        const el = document.createElement('div');
-        el.className = 'face-element';
-        el.style.transform = `rotate(${angle}deg)`;
+        const deg = i * 6;
+        const layer = document.createElement('div');
+        layer.className = 'layer';
+        layer.style.transform = `rotate(${deg}deg)`;
 
-        // 5分ごとの数字と太い目盛り
         if (i % 5 === 0) {
-            const hour24 = (i / 5 * 2); // 24時間表記用
-            const minVal = i.toString().padStart(2, '0');
-            
-            el.innerHTML = `
-                <div style="display:flex; flex-direction:column; align-items:center;">
-                    <div class="minute-label" style="transform:rotate(-${angle}deg)">${minVal}</div>
-                    <div class="tick"></div>
-                    <div class="hour-label" style="transform:rotate(-${angle}deg); margin-top:20px;">${hour24 === 0 ? '24' : hour24}</div>
-                </div>`;
+            // 5分・2時間おきの重要な指標
+            const minNum = i.toString().padStart(2, '0');
+            const hourNum = (i / 60) * 24;
+            const displayHour = hourNum === 0 ? '24' : hourNum;
+
+            layer.innerHTML = `
+                <div class="minute-label" style="transform: rotate(-${deg}deg)">${minNum}</div>
+                <div class="major-tick"></div>
+                <div class="hour-label" style="transform: rotate(-${deg}deg)">${displayHour}</div>
+            `;
         } else {
-            // ドットの目盛り
-            el.innerHTML = `<div class="dot" style="margin-top:15px;"></div>`;
+            // 1分ごとのドット
+            layer.innerHTML = `<div class="minute-dot"></div>`;
         }
-        face.appendChild(el);
+        container.appendChild(layer);
     }
 
-    function updateClock() {
+    function syncClock() {
         const now = new Date();
         const s = now.getSeconds();
         const m = now.getMinutes();
         const h = now.getHours();
+        const ms = now.getMilliseconds();
 
-        // 24時間計としての針の動き
-        const sDeg = s * 6;
-        const mDeg = m * 6 + s * 0.1;
-        const hDeg = (h % 24) * 15 + m * 0.25; // 360/24 = 15度
+        // 秒：スムーズな動き（教育用にはステップが良い場合は 1000ms 毎に更新）
+        const sDeg = (s * 6) + (ms * 0.006);
+        // 分：60分で1周
+        const mDeg = (m * 6) + (s * 0.1);
+        // 時：24時間で1周（1時間 = 15度）
+        const hDeg = (h % 24) * 15 + (m * 0.25);
 
-        document.getElementById('second').style.transform = `rotate(${sDeg}deg)`;
-        document.getElementById('minute').style.transform = `rotate(${mDeg}deg)`;
-        document.getElementById('hour').style.transform = `rotate(${hDeg}deg)`;
+        document.getElementById('s-hand').style.transform = `rotate(${sDeg}deg)`;
+        document.getElementById('m-hand').style.transform = `rotate(${mDeg}deg)`;
+        document.getElementById('h-hand').style.transform = `rotate(${hDeg}deg)`;
+
+        requestAnimationFrame(syncClock);
     }
 
-    setInterval(updateClock, 1000);
-    updateClock();
+    syncClock();
 </script>
 
 </body>
