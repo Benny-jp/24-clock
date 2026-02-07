@@ -2,120 +2,124 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Study with Sonochilii 24h Clock</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study with Sonochiii | 24H Clock</title>
     <style>
         :root {
-            --bg-color: #f0f0f0;
             --mint-green: #B2E2C9;
-            --clock-size: 500px;
+            --text-dark: #333;
+            --accent-red: #d00;
         }
-        body { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--bg-color); margin: 0; font-family: sans-serif; }
-        
-        .clock {
-            width: var(--clock-size); height: var(--clock-size);
-            border-radius: 50%; background: white;
-            border: 15px solid #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1), inset 0 0 10px rgba(0,0,0,0.2);
-            position: relative; overflow: hidden;
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
         }
-
-        /* 背景の塗り分け */
-        .clock::before {
-            content: ''; position: absolute; top: 0; width: 100%; height: 50%;
-            background: var(--mint-green); border-bottom: 1px solid #ddd;
+        .clock-container {
+            width: 90vmin;
+            height: 90vmin;
+            max-width: 600px;
+            max-height: 600px;
+            position: relative;
         }
-
-        /* 文字盤の数字と目盛り */
-        .face-container { position: absolute; width: 100%; height: 100%; }
-        .mark { position: absolute; width: 100%; height: 100%; text-align: center; }
-        
-        /* 数字のスタイル */
-        .hour-label { position: absolute; width: 100%; height: 100%; font-weight: bold; font-size: 24px; top: 10px; }
-        .min-label { position: absolute; width: 100%; height: 100%; font-size: 14px; top: -15px; color: #555; }
-
-        /* 針のスタイル */
-        .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 4px; }
-        .hour-hand { width: 8px; height: 100px; background: #333; z-index: 3; }
-        .min-hand { width: 6px; height: 160px; background: #333; z-index: 2; }
-        .sec-hand { width: 2px; height: 180px; background: #d00; z-index: 4; }
-        .center-dot { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; background: #333; border-radius: 50%; transform: translate(-50%, -50%); z-index: 5; }
-
-        /* ロゴ */
-        .logo {
-            position: absolute; width: 100%; text-align: center; top: 65%;
-            font-weight: bold; font-size: 22px; line-height: 1.2; z-index: 1;
+        svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
         }
+        .hand { stroke-linecap: round; transition: transform 0.5s cubic-bezier(0.4, 2.08, 0.55, 0.44); }
+        .second-hand { transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
 <body>
 
-<div class="clock">
-    <div class="face-container" id="face"></div>
-    <div class="logo">Study with<br>Sonochilii</div>
-    <div class="hand hour-hand" id="hourHand"></div>
-    <div class="hand min-hand" id="minHand"></div>
-    <div class="hand sec-hand" id="secHand"></div>
-    <div class="center-dot"></div>
+<div class="clock-container">
+    <svg viewBox="0 0 400 400">
+        <circle cx="200" cy="200" r="195" fill="white" stroke="#e0e0e0" stroke-width="2"/>
+        
+        <path d="M 200,200 L 5,200 A 195,195 0 0 1 395,200 Z" fill="var(--mint-green)" />
+        
+        <g id="face-elements"></g>
+
+        <text x="200" y="275" text-anchor="middle" font-weight="bold" font-size="20" fill="var(--text-dark)">Study with</text>
+        <text x="200" y="300" text-anchor="middle" font-weight="bold" font-size="20" fill="var(--text-dark)">Sonochiii</text>
+
+        <g id="hands">
+            <line id="hour-hand" x1="200" y1="200" x2="200" y2="100" stroke="var(--text-dark)" stroke-width="8" />
+            <line id="min-hand" x1="200" y1="200" x2="200" y2="50" stroke="var(--text-dark)" stroke-width="5" />
+            <line id="sec-hand" x1="200" y1="200" x2="200" y2="40" stroke="var(--accent-red)" stroke-width="2" />
+            <circle cx="200" cy="200" r="6" fill="var(--text-dark)" />
+        </g>
+    </svg>
 </div>
 
 <script>
-    const face = document.getElementById('face');
+    const faceElements = document.getElementById('face-elements');
+    const hourHand = document.getElementById('hour-hand');
+    const minHand = document.getElementById('min-hand');
+    const secHand = document.getElementById('sec-hand');
 
-    // 文字盤の生成
+    // 目盛りと数字の描画
     for (let i = 0; i < 60; i++) {
-        const mark = document.createElement('div');
-        mark.className = 'mark';
-        mark.style.transform = `rotate(${i * 6}deg)`;
-
-        // 目盛り
-        const line = document.createElement('div');
-        line.style.width = '2px';
-        line.style.height = i % 5 === 0 ? '15px' : '8px';
-        line.style.background = '#333';
-        line.style.margin = '0 auto';
-        mark.appendChild(line);
-
-        // 分の数字 (05, 10...)
-        if (i % 5 === 0) {
-            const minNum = document.createElement('div');
-            minNum.className = 'min-label';
-            minNum.innerText = i.toString().padStart(2, '0');
-            minNum.style.transform = `rotate(-${i * 6}deg)`;
-            mark.appendChild(minNum);
-        }
-        face.appendChild(mark);
-    }
-
-    // 24時間の数字
-    for (let i = 0; i < 24; i++) {
-        const hMark = document.createElement('div');
-        hMark.className = 'mark';
-        hMark.style.transform = `rotate(${i * 15}deg)`;
+        const angle = (i * 6);
+        const isFive = i % 5 === 0;
         
-        const hNum = document.createElement('div');
-        hNum.className = 'hour-label';
-        hNum.innerText = i === 0 ? '24' : i;
-        hNum.style.transform = `translateY(45px) rotate(-${i * 15}deg)`;
-        hMark.appendChild(hNum);
-        face.appendChild(hMark);
+        // 分・秒の目盛り
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        const rStart = isFive ? 180 : 185;
+        line.setAttribute("x1", 200 + 195 * Math.sin(angle * Math.PI / 180));
+        line.setAttribute("y1", 200 - 195 * Math.cos(angle * Math.PI / 180));
+        line.setAttribute("x2", 200 + rStart * Math.sin(angle * Math.PI / 180));
+        line.setAttribute("y2", 200 - rStart * Math.cos(angle * Math.PI / 180));
+        line.setAttribute("stroke", "#333");
+        line.setAttribute("stroke-width", isFive ? 3 : 1.5);
+        faceElements.appendChild(line);
+
+        // 外周の分数字 (00, 05, 10...)
+        if (isFive) {
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            const rText = 170;
+            text.setAttribute("x", 200 + rText * Math.sin(angle * Math.PI / 180));
+            text.setAttribute("y", 200 - rText * Math.cos(angle * Math.PI / 180) + 5);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("font-size", "12");
+            text.textContent = i.toString().padStart(2, '0');
+            faceElements.appendChild(text);
+        }
     }
 
-    function updateClock() {
+    // 24時間表記の数字
+    for (let i = 0; i < 24; i++) {
+        const angle = (i * 15);
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        const rText = 140;
+        text.setAttribute("x", 200 + rText * Math.sin(angle * Math.PI / 180));
+        text.setAttribute("y", 200 - rText * Math.cos(angle * Math.PI / 180) + 8);
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("font-size", "22");
+        text.setAttribute("font-weight", "bold");
+        text.textContent = i === 0 ? "24" : i;
+        faceElements.appendChild(text);
+    }
+
+    function update() {
         const now = new Date();
-        const s = now.getSeconds();
-        const m = now.getMinutes();
-        const h = now.getHours();
+        const s = now.getSeconds() + now.getMilliseconds() / 1000;
+        const m = now.getMinutes() + s / 60;
+        const h = now.getHours() + m / 60;
 
-        const sDeg = s * 6;
-        const mDeg = m * 6 + s * 0.1;
-        const hDeg = (h % 24) * 15 + m * 0.25; // 360/24 = 15度
-
-        document.getElementById('secHand').style.transform = `translateX(-50%) rotate(${sDeg}deg)`;
-        document.getElementById('minHand').style.transform = `translateX(-50%) rotate(${mDeg}deg)`;
-        document.getElementById('hourHand').style.transform = `translateX(-50%) rotate(${hDeg}deg)`;
+        // 24時間で360度回転するように設定
+        secHand.setAttribute("transform", `rotate(${s * 6}, 200, 200)`);
+        minHand.setAttribute("transform", `rotate(${m * 6}, 200, 200)`);
+        hourHand.setAttribute("transform", `rotate(${h * 15}, 200, 200)`);
+        
+        requestAnimationFrame(update);
     }
-
-    setInterval(updateClock, 1000);
-    updateClock();
+    update();
 </script>
 </body>
 </html>
