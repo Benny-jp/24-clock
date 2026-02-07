@@ -3,29 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonochiii Intelligent 24h Clock v3</title>
+    <title>Sonochiii Master Clock 24h</title>
     <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Sonochiii%20Clock%22,%22short_name%22:%22Sonochiii%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23ffffff%22,%22theme_color%22:%22%23B2E2D2%22}">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800&display=swap');
-        body { margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; background: #fdfdfd; font-family: 'M PLUS Rounded 1c', sans-serif; overflow: hidden; }
-        #clock-container { width: 94vmin; height: 94vmin; max-width: 700px; max-height: 700px; position: relative; }
-        svg { width: 100%; height: 100%; filter: drop-shadow(0 10px 25px rgba(0,0,0,0.1)); }
+        body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #fdfdfd; font-family: 'M PLUS Rounded 1c', sans-serif; overflow: hidden; }
+        #clock-container { width: 95vmin; height: 95vmin; max-width: 750px; position: relative; }
+        svg { width: 100%; height: 100%; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.1)); }
         
-        .mint-bg { fill: #B2E2D2; transition: fill 3s ease; }
-        .night-bg { fill: #2C3E50; transition: fill 3s ease; }
+        .mint-bg { fill: #B2E2D2; transition: fill 3s; }
+        .night-bg { fill: #2C3E50; transition: fill 3s; }
         .white-bg { fill: #ffffff; }
         
-        .text-hour { font-size: 42px; font-weight: 800; fill: #1a1a1a; text-anchor: middle; }
-        .text-min { font-size: 20px; font-weight: 700; fill: #888; text-anchor: middle; }
+        /* 破綻のないフォント・サイズ設計 */
+        .text-hour { font-size: 38px; font-weight: 800; fill: #111; text-anchor: middle; }
+        .text-min { font-size: 18px; font-weight: 700; fill: #999; text-anchor: middle; }
+        .logo-study { font-size: 24px; font-weight: 700; fill: #444; text-anchor: middle; }
+        .logo-main { font-size: 48px; font-weight: 800; fill: #111; text-anchor: middle; }
         
-        /* 中央ロゴの最適化 */
-        .logo-group { pointer-events: none; }
-        .logo-study { font-size: 24px; font-weight: 700; fill: #555; text-anchor: middle; }
-        .logo-main { font-size: 44px; font-weight: 800; fill: #222; text-anchor: middle; }
-        
-        /* メッセージエリア */
-        .msg-box { fill: rgba(255, 255, 255, 0.85); stroke: rgba(0,0,0,0.05); }
-        #status-msg { font-size: 18px; font-weight: 800; fill: #333; text-anchor: middle; }
+        .msg-box { fill: rgba(255, 255, 255, 0.9); }
+        #status-msg { font-size: 19px; font-weight: 800; fill: #222; text-anchor: middle; }
         .hand { stroke-linecap: round; }
     </style>
 </head>
@@ -40,29 +37,27 @@
         
         <circle cx="400" cy="400" r="385" id="bg-color" class="mint-bg" clip-path="url(#top-clip)" />
         <circle cx="400" cy="400" r="385" class="white-bg" clip-path="url(#bottom-clip)" />
-        <circle cx="400" cy="400" r="385" fill="none" stroke="#e8e8e8" stroke-width="8" />
+        <circle cx="400" cy="400" r="385" fill="none" stroke="#ddd" stroke-width="2" />
 
         <g id="dial-marks"></g>
 
-        <g class="logo-group">
-            <text x="400" y="520" class="logo-study">Study with</text>
-            <text x="400" y="575" class="logo-main">Sonochilii</text>
-        </g>
-
-        <rect x="220" y="270" width="360" height="60" rx="30" class="msg-box" />
+        <rect x="200" y="270" width="400" height="60" rx="30" class="msg-box" />
         <text x="400" y="308" id="status-msg">Loading...</text>
+        
+        <text x="400" y="520" class="logo-study">Study with</text>
+        <text x="400" y="580" class="logo-main">Sonochilii</text>
 
         <g id="hands">
-            <line id="hour-hand" x1="400" y1="400" x2="400" y2="220" stroke="#333" stroke-width="16" class="hand" />
-            <line id="min-hand" x1="400" y1="400" x2="400" y2="110" stroke="#333" stroke-width="10" class="hand" />
-            <line id="sec-hand" x1="400" y1="400" x2="400" y2="80" stroke="#ff4560" stroke-width="3" class="hand" />
-            <circle cx="400" cy="400" r="14" fill="#333" />
-            <circle cx="400" cy="400" r="5" fill="#fff" />
+            <line id="hour-hand" x1="400" y1="400" x2="400" y2="210" stroke="#333" stroke-width="14" class="hand" />
+            <line id="min-hand" x1="400" y1="400" x2="400" y2="100" stroke="#333" stroke-width="8" class="hand" />
+            <line id="sec-hand" x1="400" y1="400" x2="400" y2="70" stroke="#ff4560" stroke-width="3" class="hand" />
+            <circle cx="400" cy="400" r="12" fill="#333" />
         </g>
     </svg>
 </div>
 
 <script>
+    // PWA Service Worker
     if ('serviceWorker' in navigator) {
         const sw = `self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));`;
         const blob = new Blob([sw], { type: 'text/javascript' });
@@ -72,16 +67,25 @@
     const dialMarks = document.getElementById('dial-marks');
     const svgNS = "http://www.w3.org/2000/svg";
 
+    // 盤面生成ロジック：イラストの数値を数学的に正しく配置
     for (let i = 0; i < 60; i++) {
-        const rad = (i * 6 - 90) * (Math.PI / 180);
+        const rad = (i * 6 - 90) * (Math.PI / 180); // 00分/24時を真上に固定
+        
         if (i % 5 === 0) {
-            const h = (i / 60) * 24 || 24;
-            const m = i.toString().padStart(2, '0');
-            addText(400 + 355 * Math.cos(rad), 400 + 355 * Math.sin(rad) + 7, m, 'text-min');
-            addLine(400 + 330 * Math.cos(rad), 400 + 330 * Math.sin(rad), 400 + 300 * Math.cos(rad), 400 + 300 * Math.sin(rad), '#333', 6);
-            addText(400 + 245 * Math.cos(rad), 400 + 245 * Math.sin(rad) + 15, h, 'text-hour');
+            // 時間の表示（1目盛り 5分 = 2時間）
+            const hourValue = (i / 60) * 24;
+            const displayH = hourValue === 0 ? "24" : hourValue;
+            const minStr = i.toString().padStart(2, '0');
+
+            // 外側の分 (00, 05, 10...)
+            addText(400 + 355 * Math.cos(rad), 400 + 355 * Math.sin(rad) + 7, minStr, 'text-min');
+            // 太い目盛り
+            addLine(400 + 330 * Math.cos(rad), 400 + 330 * Math.sin(rad), 400 + 295 * Math.cos(rad), 400 + 295 * Math.sin(rad), '#333', 6);
+            // 内側の時間 (24, 2, 4...)
+            addText(400 + 240 * Math.cos(rad), 400 + 240 * Math.sin(rad) + 15, displayH, 'text-hour');
         } else {
-            addLine(400 + 330 * Math.cos(rad), 400 + 330 * Math.sin(rad), 400 + 318 * Math.cos(rad), 400 + 318 * Math.sin(rad), '#ccc', 3);
+            // 細い目盛り
+            addLine(400 + 330 * Math.cos(rad), 400 + 330 * Math.sin(rad), 400 + 315 * Math.cos(rad), 400 + 315 * Math.sin(rad), '#bbb', 3);
         }
     }
 
@@ -104,24 +108,27 @@
         const m = now.getMinutes() + s / 60;
         const h = now.getHours() + m / 60;
 
+        // 秒・分は360度/60分
         document.getElementById('sec-hand').setAttribute('transform', `rotate(${s * 6}, 400, 400)`);
         document.getElementById('min-hand').setAttribute('transform', `rotate(${m * 6}, 400, 400)`);
+        // 時針は360度/24時間 = 15度/時（ここが破綻の核心）
         document.getElementById('hour-hand').setAttribute('transform', `rotate(${h * 15}, 400, 400)`);
 
         const hr = now.getHours();
         const bg = document.getElementById('bg-color');
         const msg = document.getElementById('status-msg');
 
-        // ロジック：21時から3時は紺色、それ以外はミントグリーン
+        // 21:00〜3:00は夜モード
         if (hr >= 21 || hr < 3) {
             bg.setAttribute('class', 'night-bg');
-            msg.textContent = "静かな夜を。ゆっくり休みましょう";
+            msg.textContent = "おやすみなさい。良い夢を ✨";
+            msg.style.fill = "#2C3E50";
         } else {
             bg.setAttribute('class', 'mint-bg');
             if (hr >= 6 && hr < 15) {
-                msg.textContent = "Study with Sonochiii 配信中 ♪";
+                msg.textContent = "Study with Sonochiii 配信中 🎶";
             } else {
-                msg.textContent = "今日も素敵な一日を";
+                msg.textContent = "今日も一緒に歩みましょう ☀️";
             }
         }
         requestAnimationFrame(update);
