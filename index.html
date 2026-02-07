@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Study with Sonochiii</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@900&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -16,39 +14,41 @@
         }
         body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #eee; font-family: 'Zen Maru Gothic', sans-serif; overflow: hidden; }
         
-        /* 背景：上半分が白、下半分がミントグリーン。borderを白に設定して縁取りを表現 */
+        /* 指示通り：上部白、下部ミントグリーンの背景 */
         .clock { 
             width: var(--size); 
             height: var(--size); 
             background: linear-gradient(to bottom, var(--white) 50%, var(--mint) 50%); 
-            border: 15px solid var(--white); 
+            border: 12px solid var(--white); /* 白い縁取り */
             border-radius: 50%; 
             position: relative; 
             box-shadow: 0 15px 40px rgba(0,0,0,0.1); 
             box-sizing: border-box;
         }
         
-        .logo { position: absolute; top: 68%; width: 100%; text-align: center; font-size: 1.3rem; line-height: 1.2; color: var(--black); z-index: 5; pointer-events: none; }
+        /* 共通マーカー設定 */
+        .marker { position: absolute; width: 100%; height: 100%; top: 0; left: 0; text-align: center; pointer-events: none; }
+
+        /* 分の数字：最外周（縁の内側ギリギリ） */
+        .min-num { font-size: 0.9rem; font-weight: 700; color: #444; padding-top: 8px; }
+
+        /* 24時間数字：内側に配置 */
+        .hour-num { font-size: 1.6rem; font-weight: 900; color: #222; padding-top: 55px; }
+        
+        /* 黒い時計のデザインを踏襲したドットとメモリ */
+        .tick { position: absolute; width: 2px; height: 10px; background: #222; left: 50%; top: 0; margin-left: -1px; }
+        .dot { position: absolute; width: 4px; height: 4px; background: #888; border-radius: 50%; left: 50%; top: 35px; margin-left: -2px; }
+
+        /* ロゴ */
+        .logo { position: absolute; top: 68%; width: 100%; text-align: center; font-size: 1.3rem; line-height: 1.2; color: var(--black); z-index: 5; }
         .logo span { font-size: 1.6rem; display: block; font-weight: 900; }
 
-        .marker { position: absolute; width: 100%; height: 100%; text-align: center; pointer-events: none; }
-        
-        /* 数字の配置最適化 */
-        /* 分の数字（最外周）：縁ギリギリに配置 */
-        .min-num { font-size: 0.85rem; padding: 4px; color: #444; font-weight: 700; z-index: 4; }
-        /* 24時間数字（内側） */
-        .hour-num { font-size: 1.6rem; font-weight: 900; padding: 45px; color: #222; z-index: 3; }
-        
-        /* メモリとドット：黒ベースの視認性向上デザイン */
-        .tick { position: absolute; width: 2px; height: 12px; background: #222; left: 50%; transform-origin: 0 calc((var(--size) - 30px) / 2); margin-left: -1px; top: 0; }
-        .dot { position: absolute; width: 4px; height: 4px; background: #777; border-radius: 50%; left: 50%; transform-origin: 0 calc((var(--size) - 30px) / 2); margin-left: -2px; top: 18px; }
-
-        /* 針のデザイン */
+        /* 針 */
         .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 6px; background: #222; transform: translateX(-50%); }
         .hour-hand { width: 10px; height: 26%; z-index: 10; }
         .minute-hand { width: 6px; height: 38%; z-index: 11; background: #333; }
-        .second-hand { width: 2px; height: 44%; z-index: 12; background: #ff4757; }
-        .center-dot { position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; background: #222; border-radius: 50%; transform: translate(-50%, -50%); z-index: 20; border: 3px solid var(--white); }
+        .second-hand { width: 2px; height: 42%; z-index: 12; background: #ff4757; }
+        .center-dot { position: absolute; top: 50%; left: 50%; width: 18px; height: 18px; background: #222; border-radius: 50%; transform: translate(-50%, -50%); z-index: 20; border: 2px solid var(--white); }
     </style>
 </head>
 <body>
@@ -60,65 +60,50 @@
     <div id="second" class="hand second-hand"></div>
 </div>
 <script>
-    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(()=>{}); }
     const clock = document.getElementById('clock');
     
-    // 24時間数字の生成（内側）
+    // 24時間数字（内側）
     for (let i = 1; i <= 24; i++) {
         const r = i * 15;
         const h = document.createElement('div'); h.className = 'marker hour-num';
         h.style.transform = `rotate(${r}deg)`;
-        // 24はそのまま、それ以外を表示
         h.innerHTML = `<div style="transform:rotate(-${r}deg)">${i}</div>`;
         clock.appendChild(h);
     }
     
-    // 1分ドットと5分数字（最外周）
+    // 分の数字（最外周）とドット・メモリ
     for (let i = 0; i < 60; i++) {
         const r = i * 6;
         if (i % 5 === 0) {
-            // 分の数字を最外周に
+            // 分の数字（00は黒）
             const m = document.createElement('div'); m.className = 'marker min-num';
             m.style.transform = `rotate(${r}deg)`;
-            let label = i === 0 ? '00' : i.toString().padStart(2, '0');
-            m.innerHTML = `<div style="transform:rotate(-${r}deg)">${label}</div>`;
+            let val = i === 0 ? '00' : i.toString().padStart(2, '0');
+            m.innerHTML = `<div style="transform:rotate(-${r}deg)">${val}</div>`;
             clock.appendChild(m);
             
-            // 5分ごとの太いメモリ
+            // 5分ごとの目盛り
             const t = document.createElement('div'); t.className = 'tick';
             t.style.transform = `rotate(${r}deg)`;
             clock.appendChild(t);
         } else {
-            // 視認性を高めるドット
-            const d = document.createElement('div'); d.className = 'dot';
+            // 視認性ドット
+            const d = document.createElement('div'); d.className = 'marker';
             d.style.transform = `rotate(${r}deg)`;
+            d.innerHTML = `<div class="dot"></div>`;
             clock.appendChild(d);
         }
     }
 
-    // FPS制御を考慮した更新処理
-    const fps = 30;
-    const interval = 1000 / fps;
-    let lastTime = Date.now();
-
+    // 更新処理
     function update() {
-        requestAnimationFrame(update);
-        const currentTime = Date.now();
-        const deltaTime = currentTime - lastTime;
-        
-        if (deltaTime > interval) {
-            const n = new Date();
-            const s = n.getSeconds(), m = n.getMinutes(), h = n.getHours();
-            
-            // 24時間時計の針の動き計算
-            document.getElementById('second').style.transform = `translateX(-50%) rotate(${(s/60)*360}deg)`;
-            document.getElementById('minute').style.transform = `translateX(-50%) rotate(${(m/60)*360+(s/60)*6}deg)`;
-            document.getElementById('hour').style.transform = `translateX(-50%) rotate(${(h/24)*360+(m/60)*15}deg)`;
-            
-            lastTime = currentTime - (deltaTime % interval);
-        }
+        const n = new Date();
+        const s = n.getSeconds(), m = n.getMinutes(), h = n.getHours();
+        document.getElementById('second').style.transform = `translateX(-50%) rotate(${(s/60)*360}deg)`;
+        document.getElementById('minute').style.transform = `translateX(-50%) rotate(${(m/60)*360+(s/60)*6}deg)`;
+        document.getElementById('hour').style.transform = `translateX(-50%) rotate(${(h/24)*360+(m/60)*15}deg)`;
     }
-    update();
+    setInterval(update, 1000); update();
 </script>
 </body>
 </html>
