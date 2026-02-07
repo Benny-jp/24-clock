@@ -1,14 +1,1 @@
-// 追加すべきFPS制御のロジック
-const fps = 30;
-const interval = 1000 / fps;
-let lastTime = (new Date()).getTime();
 
-function animate() {
-    requestAnimationFrame(animate);
-    const currentTime = (new Date()).getTime();
-    const deltaTime = currentTime - lastTime;
-    if (deltaTime > interval) {
-        // ここに描画処理を記述
-        lastTime = currentTime - (deltaTime % interval);
-    }
-}
