@@ -3,137 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study with Sonochiii | Life Clock 24</title>
+    <title>Study with Sonochiii | 24H Life Clock Masterpiece</title>
     <style>
         :root {
+            --gold-gradient: linear-gradient(145deg, #d4af37, #fcf6ba, #b8860b, #fbf5b7, #aa771c);
             --mint-green: #B2E2C9;
+            --deep-navy: #1B263B;
             --pure-white: #FFFFFF;
-            --clock-black: #1A1A1A;
-            --second-red: #D90429;
+            --text-dark: #1a1a1a;
+            --second-red: #d90429;
         }
         body {
-            margin: 0;
-            background: #F8F9FA;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0; background: #f0f0f0;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; overflow: hidden; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
         }
         .clock-container {
-            width: 95vmin;
-            height: 95vmin;
-            max-width: 800px;
-            max-height: 800px;
+            width: 95vmin; height: 95vmin; max-width: 800px; max-height: 800px;
             position: relative;
         }
-        svg {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 15px 35px rgba(0,0,0,0.12));
-        }
+        svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 20px 50px rgba(0,0,0,0.15)); }
+        
+        /* ゴールドの縁取り */
+        .bezel { fill: url(#goldGradient); stroke: #8a6d3b; stroke-width: 0.5; }
+        
+        /* アナログスイープ運針 */
+        .hand { stroke-linecap: round; }
     </style>
 </head>
 <body>
 
 <div class="clock-container">
     <svg viewBox="0 0 400 400">
-        <circle cx="200" cy="200" r="198" fill="#F0F0F0" />
-        <circle cx="200" cy="200" r="194" fill="white" />
+        <defs>
+            <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#d4af37;stop-opacity:1" />
+                <stop offset="25%" style="stop-color:#fcf6ba;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#b8860b;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#aa771c;stop-opacity:1" />
+            </linearGradient>
+            <filter id="innerShadow">
+                <feOffset dx="0" dy="2"/>
+                <feGaussianBlur stdDeviation="3" result="offset-blur"/>
+                <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse"/>
+                <feFlood flood-color="black" flood-opacity="0.2" result="color"/>
+                <feComposite operator="in" in="color" in2="inverse" result="shadow"/>
+                <feComposite operator="over" in="shadow" in2="SourceGraphic"/>
+            </filter>
+        </defs>
+
+        <circle cx="200" cy="200" r="200" class="bezel" />
+        <circle cx="200" cy="200" r="192" fill="white" />
         
-        <path d="M 6,200 A 194,194 0 0 1 394,200 L 200,200 Z" fill="var(--mint-green)" />
-        <path d="M 6,200 A 194,194 0 0 0 394,200 L 200,200 Z" fill="var(--pure-white)" />
+        <g id="background-layer"></g>
 
         <g id="dial-elements"></g>
 
         <g transform="translate(200, 290)">
-            <text text-anchor="middle" font-size="14" font-weight="500" fill="#666" y="-22">Study with</text>
-            <text text-anchor="middle" font-size="26" font-weight="900" fill="var(--clock-black)" letter-spacing="-0.5">Sonochiii</text>
-            <text text-anchor="middle" font-size="10" fill="#999" y="14">~ Every Moment Matters ~</text>
+            <text text-anchor="middle" font-size="14" font-weight="500" fill="#555" y="-22">Study with</text>
+            <text text-anchor="middle" font-size="28" font-weight="900" fill="var(--text-dark)" letter-spacing="-0.5">Sonochiii</text>
+            <text text-anchor="middle" font-size="10" fill="#888" y="14">~ Every Moment Matters ~</text>
         </g>
 
         <g id="hands">
-            <line id="hour-hand" x1="200" y1="200" x2="200" y2="120" stroke="var(--clock-black)" stroke-width="7" stroke-linecap="round" />
-            <line id="min-hand" x1="200" y1="200" x2="200" y2="70" stroke="var(--clock-black)" stroke-width="4.5" stroke-linecap="round" />
-            <line id="sec-hand" x1="200" y1="200" x2="200" y2="50" stroke="var(--second-red)" stroke-width="1.5" stroke-linecap="round" />
-            <circle cx="200" cy="200" r="4.5" fill="var(--clock-black)" />
-            <circle cx="200" cy="200" r="1.5" fill="#666" />
+            <line id="h-hand" x1="200" y1="200" x2="200" y2="120" stroke="var(--text-dark)" stroke-width="7" class="hand" />
+            <line id="m-hand" x1="200" y1="200" x2="200" y2="65" stroke="var(--text-dark)" stroke-width="4.5" class="hand" />
+            <line id="s-hand" x1="200" y1="200" x2="200" y2="45" stroke="var(--second-red)" stroke-width="1.5" class="hand" />
+            <circle cx="200" cy="200" r="5" fill="var(--text-dark)" />
         </g>
     </svg>
 </div>
 
 <script>
     const dial = document.getElementById('dial-elements');
+    const bgLayer = document.getElementById('background-layer');
 
-    // 1. 分・秒ドットと外周数字 (イラストに忠実に配置)
-    for (let i = 0; i < 60; i++) {
-        const angle = i * 6;
-        const rad = (angle - 90) * (Math.PI / 180);
-        const isFive = i % 5 === 0;
-        
-        // 目盛り線
-        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        const rStart = 194;
-        const rEnd = isFive ? 182 : 188;
-        line.setAttribute("x1", 200 + rStart * Math.cos(rad));
-        line.setAttribute("y1", 200 + rStart * Math.sin(rad));
-        line.setAttribute("x2", 200 + rEnd * Math.cos(rad));
-        line.setAttribute("y2", 200 + rEnd * Math.sin(rad));
-        line.setAttribute("stroke", "#333");
-        line.setAttribute("stroke-width", isFive ? "2" : "0.8");
-        dial.appendChild(line);
+    function setupDial() {
+        // 60分割の目盛りと分数字
+        for (let i = 0; i < 60; i++) {
+            const angle = i * 6;
+            const rad = (angle - 90) * (Math.PI / 180);
+            const isFive = i % 5 === 0;
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            const rOut = 192;
+            const rIn = isFive ? 178 : 186;
+            line.setAttribute("x1", 200 + rOut * Math.cos(rad));
+            line.setAttribute("y1", 200 + rOut * Math.sin(rad));
+            line.setAttribute("x2", 200 + rIn * Math.cos(rad));
+            line.setAttribute("y2", 200 + rIn * Math.sin(rad));
+            line.setAttribute("stroke", "#333");
+            line.setAttribute("stroke-width", isFive ? "2.5" : "0.8");
+            dial.appendChild(line);
 
-        // 外周の分数字 (00, 05, 10...)
-        if (isFive) {
+            if (isFive) {
+                const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                const rText = 168;
+                txt.setAttribute("x", 200 + rText * Math.cos(rad));
+                txt.setAttribute("y", 200 + rText * Math.sin(rad) + 4);
+                txt.setAttribute("text-anchor", "middle");
+                txt.setAttribute("font-size", "11");
+                txt.textContent = i.toString().padStart(2, '0');
+                dial.appendChild(txt);
+            }
+        }
+
+        // 24時間表記のメイン数字（外周寄りの完璧な配置）
+        for (let i = 0; i < 24; i++) {
+            const angle = i * 15;
+            const rad = (angle - 90) * (Math.PI / 180);
             const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            const rText = 172;
+            const rText = 142;
             txt.setAttribute("x", 200 + rText * Math.cos(rad));
-            txt.setAttribute("y", 200 + rText * Math.sin(rad) + 4);
+            txt.setAttribute("y", 200 + rText * Math.sin(rad) + 8);
             txt.setAttribute("text-anchor", "middle");
-            txt.setAttribute("font-size", "10");
-            txt.setAttribute("font-weight", "500");
-            txt.setAttribute("fill", "#555");
-            txt.textContent = i.toString().padStart(2, '0');
+            txt.setAttribute("font-size", "24");
+            txt.setAttribute("font-weight", "800");
+            txt.textContent = i === 0 ? "24" : i;
             dial.appendChild(txt);
         }
     }
 
-    // 2. 24時間表記のメイン数字
-    for (let i = 0; i < 24; i++) {
-        const angle = i * 15;
-        const rad = (angle - 90) * (Math.PI / 180);
-        const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        const rText = 145; // 外周寄りに配置
-        
-        txt.setAttribute("x", 200 + rText * Math.cos(rad));
-        txt.setAttribute("y", 200 + rText * Math.sin(rad) + 8);
-        txt.setAttribute("text-anchor", "middle");
-        txt.setAttribute("font-size", "22");
-        txt.setAttribute("font-weight", "700");
-        txt.setAttribute("fill", "var(--clock-black)");
-        txt.textContent = i === 0 ? "24" : i;
-        dial.appendChild(txt);
-    }
-
-    // 3. アナログな動きを実現する関数
-    function render() {
+    function updateClock() {
         const now = new Date();
         const ms = now.getMilliseconds();
         const s = now.getSeconds() + ms / 1000;
         const m = now.getMinutes() + s / 60;
         const h = now.getHours() + m / 60;
 
-        // 秒針：1秒間に6度回転、スイープ運針
-        document.getElementById('sec-hand').setAttribute("transform", `rotate(${s * 6}, 200, 200)`);
-        // 長針：1分間に6度回転
-        document.getElementById('min-hand').setAttribute("transform", `rotate(${m * 6}, 200, 200)`);
-        // 短針：1時間に15度(360/24)回転
-        document.getElementById('hour-hand').setAttribute("transform", `rotate(${h * 15}, 200, 200)`);
+        // 背景色の動的制御 (21:00-6:00は紺色、それ以外の上半分はミント)
+        const isNightMode = (now.getHours() >= 21 || now.getHours() < 6);
+        const topColor = isNightMode ? "var(--deep-navy)" : "var(--mint-green)";
+        const textColor = isNightMode ? "white" : "var(--text-dark)";
         
-        requestAnimationFrame(render);
+        bgLayer.innerHTML = `
+            <path d="M 8,200 A 192,192 0 0 1 392,200 L 200,200 Z" fill="${topColor}" />
+            <path d="M 8,200 A 192,192 0 0 0 392,200 L 200,200 Z" fill="white" />
+        `;
+        
+        // 針の回転
+        document.getElementById('s-hand').setAttribute("transform", `rotate(${s * 6}, 200, 200)`);
+        document.getElementById('m-hand').setAttribute("transform", `rotate(${m * 6}, 200, 200)`);
+        document.getElementById('h-hand').setAttribute("transform", `rotate(${h * 15}, 200, 200)`);
+        
+        requestAnimationFrame(updateClock);
     }
-    render();
+
+    setupDial();
+    updateClock();
 </script>
 </body>
 </html>
