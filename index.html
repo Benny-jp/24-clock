@@ -13,35 +13,29 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: #ffffff;
+            background: #fdfdfd;
             font-family: 'M PLUS Rounded 1c', sans-serif;
-            transition: background-color 2s ease;
+            overflow: hidden;
         }
 
         #clock-container {
-            width: 92vmin;
-            height: 92vmin;
-            max-width: 800px;
-            max-height: 800px;
+            width: 95vmin;
+            height: 95vmin;
+            max-width: 750px;
+            max-height: 750px;
+            position: relative;
         }
 
-        svg {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.06));
-        }
+        svg { width: 100%; height: 100%; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1)); }
 
-        /* 動的に変更可能なスタイル */
-        .mint-bg { fill: #B2E2D2; transition: fill 2s ease; }
+        .mint-bg { fill: #B2E2D2; transition: fill 3s ease; }
         .white-bg { fill: #ffffff; }
-        .text-hour { font-size: 46px; font-weight: 800; fill: #222; text-anchor: middle; }
-        .text-min { font-size: 22px; font-weight: 700; fill: #777; text-anchor: middle; }
-        .logo-study { font-size: 28px; font-weight: 700; fill: #444; text-anchor: middle; }
-        .logo-name { font-size: 52px; font-weight: 800; fill: #222; text-anchor: middle; }
-        .hand { stroke-linecap: round; }
+        .text-hour { font-size: 42px; font-weight: 800; fill: #1a1a1a; text-anchor: middle; }
+        .text-min { font-size: 20px; font-weight: 700; fill: #888; text-anchor: middle; }
+        .logo-text { font-size: 32px; font-weight: 800; fill: #333; text-anchor: middle; }
+        .hand { stroke-linecap: round; transition: stroke 1s; }
         
-        /* メッセージ表示エリア */
-        #status-msg { font-size: 20px; font-weight: 700; fill: #555; text-anchor: middle; opacity: 0.8; }
+        #status-msg { font-size: 18px; font-weight: 700; fill: #666; text-anchor: middle; }
     </style>
 </head>
 <body>
@@ -53,22 +47,22 @@
             <clipPath id="bottom-clip"><rect x="0" y="400" width="800" height="400" /></clipPath>
         </defs>
         
-        <circle cx="400" cy="400" r="385" id="top-sector" class="mint-bg" clip-path="url(#top-clip)" />
-        <circle cx="400" cy="400" r="385" class="white-bg" clip-path="url(#bottom-clip)" />
-        <circle cx="400" cy="400" r="385" fill="none" stroke="#f5f5f5" stroke-width="12" />
+        <circle cx="400" cy="400" r="380" id="bg-color" class="mint-bg" clip-path="url(#top-clip)" />
+        <circle cx="400" cy="400" r="380" class="white-bg" clip-path="url(#bottom-clip)" />
+        <circle cx="400" cy="400" r="380" fill="none" stroke="#e0e0e0" stroke-width="8" />
 
         <g id="dial-marks"></g>
 
-        <text x="400" y="480" id="status-msg">今日も一緒に頑張りましょう！</text>
-        <text x="400" y="560" class="logo-study">Study with</text>
-        <text x="400" y="620" class="logo-name">Sonochiii</text>
+        <text x="400" y="650" class="logo-text">Study with</text>
+        <text x="400" y="700" class="logo-text">Sonochilii</text>
+        <text x="400" y="550" id="status-msg"></text>
 
         <g id="hands">
-            <line id="hour-hand" x1="400" y1="400" x2="400" y2="200" stroke="#222" stroke-width="18" class="hand" />
-            <line id="min-hand" x1="400" y1="400" x2="400" y2="100" stroke="#222" stroke-width="12" class="hand" />
-            <line id="sec-hand" x1="400" y1="400" x2="400" y2="70" stroke="#ff4560" stroke-width="4" class="hand" />
-            <circle cx="400" cy="400" r="16" fill="#222" />
-            <circle cx="400" cy="400" r="6" fill="#fff" />
+            <line id="hour-hand" x1="400" y1="400" x2="400" y2="230" stroke="#333" stroke-width="16" class="hand" />
+            <line id="min-hand" x1="400" y1="400" x2="400" y2="120" stroke="#333" stroke-width="10" class="hand" />
+            <line id="sec-hand" x1="400" y1="400" x2="400" y2="90" stroke="#ff4560" stroke-width="3" class="hand" />
+            <circle cx="400" cy="400" r="14" fill="#333" />
+            <circle cx="400" cy="400" r="5" fill="#fff" />
         </g>
     </svg>
 </div>
@@ -77,26 +71,27 @@
     const dialMarks = document.getElementById('dial-marks');
     const svgNS = "http://www.w3.org/2000/svg";
 
-    // 盤面生成（イラストの精密再現）
+    // 盤面の描画（イラストの正確なインデックス配置）
     for (let i = 0; i < 60; i++) {
-        const angle = i * 6;
+        const angle = i * 6; // 6度ずつ（秒・分用）
         const rad = (angle - 90) * (Math.PI / 180);
         
-        if (i % 5 === 0) {
-            const displayH = ((i / 60) * 24 === 0) ? '24' : (i / 60) * 24;
+        if (i % 5 === 0) { // 5分/2時間おき
+            const hourVal = (i / 60) * 24;
+            const displayH = hourVal === 0 ? "24" : hourVal;
             const minStr = i.toString().padStart(2, '0');
 
-            addText(400 + 355 * Math.cos(rad), 400 + 355 * Math.sin(rad) + 8, minStr, 'text-min');
-            addLine(400 + 330 * Math.cos(rad), 400 + 330 * Math.sin(rad), 
-                    400 + 300 * Math.cos(rad), 400 + 300 * Math.sin(rad), '#333', 7);
-            addText(400 + 245 * Math.cos(rad), 400 + 245 * Math.sin(rad) + 16, displayH, 'text-hour');
+            // 外側の分（00, 05, 10...）
+            addText(400 + 350 * Math.cos(rad), 400 + 350 * Math.sin(rad) + 7, minStr, 'text-min');
+            // 目盛り
+            addLine(400 + 325 * Math.cos(rad), 400 + 325 * Math.sin(rad), 
+                    400 + 290 * Math.cos(rad), 400 + 290 * Math.sin(rad), '#444', 6);
+            // 内側の時間（24, 2, 4...）
+            addText(400 + 240 * Math.cos(rad), 400 + 240 * Math.sin(rad) + 15, displayH, 'text-hour');
         } else {
-            const circle = document.createElementNS(svgNS, "circle");
-            circle.setAttribute("cx", 400 + 315 * Math.cos(rad));
-            circle.setAttribute("cy", 400 + 315 * Math.sin(rad));
-            circle.setAttribute("r", 5);
-            circle.setAttribute("fill", "#ccc");
-            dialMarks.appendChild(circle);
+            // 小さな目盛り（ドットではなく線で視認性向上）
+            addLine(400 + 325 * Math.cos(rad), 400 + 325 * Math.sin(rad), 
+                    400 + 310 * Math.cos(rad), 400 + 310 * Math.sin(rad), '#bbb', 3);
         }
     }
 
@@ -117,40 +112,40 @@
         dialMarks.appendChild(l);
     }
 
-    // オートメーション機能：時間に応じた変化
-    function updateAutomation(hours) {
-        const topSector = document.getElementById('top-sector');
-        const statusMsg = document.getElementById('status-msg');
-        
-        if (hours >= 6 && hours < 15) { // 配信時間帯
-            topSector.style.fill = "#B2E2D2"; // ミント
-            statusMsg.textContent = "Study with Sonochiii 配信中 ♪";
-        } else if (hours >= 15 && hours < 21) {
-            topSector.style.fill = "#FFD1DC"; // 休憩：淡いピンク
-            statusMsg.textContent = "今日の復習をしましょう";
-        } else {
-            topSector.style.fill = "#AEC6CF"; // 夜間：パステルブルー
-            statusMsg.textContent = "しっかり休んで明日も笑顔で";
-        }
-    }
-
-    function animate() {
+    function updateClock() {
         const now = new Date();
         const ms = now.getMilliseconds();
         const s = now.getSeconds() + ms / 1000;
         const m = now.getMinutes() + s / 60;
-        const h = (now.getHours() % 24) + m / 60;
+        const h = now.getHours() + m / 60;
 
+        // 秒針・分針は通常の時計と同じ（1周60単位）
         document.getElementById('sec-hand').setAttribute('transform', `rotate(${s * 6}, 400, 400)`);
         document.getElementById('min-hand').setAttribute('transform', `rotate(${m * 6}, 400, 400)`);
+        // 時針は24時間で1周（360 / 24 = 15度/時）
         document.getElementById('hour-hand').setAttribute('transform', `rotate(${h * 15}, 400, 400)`);
+
+        // 教育・治験向け：時間帯による環境最適化
+        const hr = now.getHours();
+        const bgColor = document.getElementById('bg-color');
+        const statusMsg = document.getElementById('status-msg');
+
+        if (hr >= 6 && hr < 15) {
+            bgColor.style.fill = "#B2E2D2"; // 集中力を高めるミント
+            statusMsg.textContent = "学習タイム：光を浴びて脳を活性化しましょう";
+        } else if (hr >= 15 && hr < 21) {
+            bgColor.style.fill = "#FFEBCC"; // リラックスのオレンジ
+            statusMsg.textContent = "夕食とリラックス：入眠の準備を始めましょう";
+        } else {
+            bgColor.style.fill = "#2C3E50"; // 深い眠りを誘うネイビー
+            statusMsg.textContent = "消灯タイム：ブルーライトを避けて休息を";
+            statusMsg.style.fill = "#ecf0f1";
+        }
         
-        if (now.getSeconds() === 0) updateAutomation(now.getHours());
-        requestAnimationFrame(animate);
+        requestAnimationFrame(updateClock);
     }
 
-    updateAutomation(new Date().getHours());
-    animate();
+    updateClock();
 </script>
 </body>
 </html>
