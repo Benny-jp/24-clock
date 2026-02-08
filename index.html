@@ -2,52 +2,46 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Study with Sonochiii - Dual Tone 24H Clock</title>
+    <title>Study with Sonochiii - Ultimate Fullscreen 24H Clock</title>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --mint-green: #B2E2D2;
-            --logo-black: #2c2c2c; /* 少しだけ柔らかい黒 */
-            --clock-size: 500px;
+            --logo-black: #2c2c2c;
+            /* 指令：画面全体に表示（高さを基準に最大化） */
+            --clock-size: 95vh; 
         }
         body {
             display: flex; justify-content: center; align-items: center;
             height: 100vh; margin: 0; background-color: #eee;
+            overflow: hidden; /* フルスクリーン時のスクロール防止 */
         }
         .clock {
             width: var(--clock-size); height: var(--clock-size);
-            /* 修正点：配色を「右：ミント」から「上：ミント、下：白」へ変更 */
             background: linear-gradient(to bottom, var(--mint-green) 50%, #ffffff 50%);
-            border: 12px solid #fff; border-radius: 50%;
-            position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border: calc(var(--clock-size) * 0.025) solid #fff; border-radius: 50%;
+            position: relative; box-shadow: 0 15px 45px rgba(0,0,0,0.15);
         }
         .logo {
-            position: absolute; 
-            top: 66%; /* 改行に合わせて位置を微調整 */
-            width: 100%;
-            text-align: center; 
-            font-weight: 900; 
-            font-size: 1.3rem; 
-            line-height: 1.2; /* 行間を詰めて一体感を出す */
-            color: var(--logo-black); 
-            font-family: 'Zen Maru Gothic', sans-serif;
-            letter-spacing: 0.02em;
-            z-index: 15;
-            filter: drop-shadow(0 0 2px rgba(255,255,255,0.8)); /* 視認性UP */
+            position: absolute; top: 66%; width: 100%; text-align: center; 
+            font-weight: 900; font-size: calc(var(--clock-size) * 0.04); 
+            line-height: 1.2; color: var(--logo-black); font-family: 'Zen Maru Gothic', sans-serif;
+            z-index: 15; filter: drop-shadow(0 0 2px rgba(255,255,255,0.8));
         }
-        .logo span { font-size: 1.7rem; } /* Sonochiiiを少し大きく */
+        .logo span { font-size: calc(var(--clock-size) * 0.055); } 
         
-        /* 以下、時計の基本構造（変更なし） */
+        /* 破綻防止：回転軸を固定値(250px)からサイズ連動(50%)へ変更 */
         .marker { position: absolute; width: 100%; height: 100%; text-align: center; color: #333; font-family: 'Zen Maru Gothic', sans-serif; }
-        .hour-num { font-size: 2.0rem; font-weight: 700; padding: 40px; box-sizing: border-box; }
-        .min-num { font-size: 0.85rem; font-weight: 500; padding: 10px; box-sizing: border-box; }
-        .tick { position: absolute; width: 2px; height: 5px; background: #333; left: 50%; transform-origin: 0 250px; }
-        .dot { position: absolute; width: 4px; height: 4px; background: #999; border-radius: 50%; left: 50%; transform-origin: 0 250px; }
+        .hour-num { font-size: calc(var(--clock-size) * 0.06); font-weight: 700; padding: calc(var(--clock-size) * 0.08); box-sizing: border-box; }
+        .min-num { font-size: calc(var(--clock-size) * 0.03); font-weight: 500; padding: calc(var(--clock-size) * 0.02); box-sizing: border-box; }
+        .tick { position: absolute; width: 2px; height: calc(var(--clock-size) * 0.015); background: #333; left: 50%; transform-origin: 0 calc(var(--clock-size) / 2); }
+        .dot { position: absolute; width: 4px; height: 4px; background: #999; border-radius: 50%; left: 50%; transform-origin: 0 calc(var(--clock-size) / 2); }
+        
         .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 4px; background: #222; }
-        .hour-hand { width: 8px; height: 130px; z-index: 10; }
-        .minute-hand { width: 5px; height: 180px; z-index: 11; background: #444; }
-        .second-hand { width: 2px; height: 210px; z-index: 12; background: #ff4757; }
-        .center-dot { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; background: #222; border-radius: 50%; transform: translate(-50%, -50%); z-index: 20; }
+        .hour-hand { width: calc(var(--clock-size) * 0.016); height: calc(var(--clock-size) * 0.26); z-index: 10; }
+        .minute-hand { width: calc(var(--clock-size) * 0.01); height: calc(var(--clock-size) * 0.36); z-index: 11; background: #444; }
+        .second-hand { width: calc(var(--clock-size) * 0.005); height: calc(var(--clock-size) * 0.42); z-index: 12; background: #ff4757; }
+        .center-dot { position: absolute; top: 50%; left: 50%; width: calc(var(--clock-size) * 0.032); height: calc(var(--clock-size) * 0.032); background: #222; border-radius: 50%; transform: translate(-50%, -50%); z-index: 20; }
     </style>
 </head>
 <body>
@@ -61,6 +55,7 @@
 </div>
 
 <script>
+    /* ロジックは完璧なオリジナルを完全継承 */
     const clock = document.getElementById('clock');
     for (let i = 1; i <= 24; i++) {
         const hWrap = document.createElement('div');
@@ -102,6 +97,5 @@
     }
     setInterval(update, 1000); update();
 </script>
-
 </body>
 </html>
