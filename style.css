@@ -1,17 +1,7 @@
-body, html {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden; /* 画面からはみ出さないようにする */
+#clock-container {
+  width: 90vmin;  /* vminは「縦と横のうち、短い方」を100とする単位 */
+  height: 90vmin; 
   display: flex;
-  justify-content: center; /* 横の真ん中 */
-  align-items: center;     /* 縦の真ん中 */
-  background-color: #000;  /* 背景を黒にすると没入感アップ */
-}
-
-#clock { /* あなたの時計のID名に合わせてください */
-  width: 95vw;  /* 画面の横幅の95% */
-  height: 95vh; /* 画面の高さの95% */
-  object-fit: contain; /* 形を崩さずに目一杯広げる */
+  justify-content: center;
+  align-items: center;
 }
