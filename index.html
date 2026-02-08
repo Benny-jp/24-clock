@@ -2,27 +2,106 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study with Sonochiii - Final Corrected</title>
-    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@900&display=swap" rel="stylesheet">
+    <title>Study with Sonochiii - Dual Tone 24H Clock</title>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --mint: #B2E2D2; --black: #2c2c2c; }
-        body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f5f5f5; overflow: hidden; }
-        svg { width: 95vmin; height: 95vmin; }
-        text { font-family: 'Zen Maru Gothic', sans-serif; font-weight: 900; text-anchor: middle; dominant-baseline: central; fill: var(--black); }
+        :root {
+            --mint-green: #B2E2D2;
+            --logo-black: #2c2c2c; /* 少しだけ柔らかい黒 */
+            --clock-size: 500px;
+        }
+        body {
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; margin: 0; background-color: #eee;
+        }
+        .clock {
+            width: var(--clock-size); height: var(--clock-size);
+            /* 修正点：配色を「右：ミント」から「上：ミント、下：白」へ変更 */
+            background: linear-gradient(to bottom, var(--mint-green) 50%, #ffffff 50%);
+            border: 12px solid #fff; border-radius: 50%;
+            position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        .logo {
+            position: absolute; 
+            top: 66%; /* 改行に合わせて位置を微調整 */
+            width: 100%;
+            text-align: center; 
+            font-weight: 900; 
+            font-size: 1.3rem; 
+            line-height: 1.2; /* 行間を詰めて一体感を出す */
+            color: var(--logo-black); 
+            font-family: 'Zen Maru Gothic', sans-serif;
+            letter-spacing: 0.02em;
+            z-index: 15;
+            filter: drop-shadow(0 0 2px rgba(255,255,255,0.8)); /* 視認性UP */
+        }
+        .logo span { font-size: 1.5rem; } /* Sonochiiiを少し大きく */
+        
+        /* 以下、時計の基本構造（変更なし） */
+        .marker { position: absolute; width: 100%; height: 100%; text-align: center; color: #333; font-family: 'Zen Maru Gothic', sans-serif; }
+        .hour-num { font-size: 1.6rem; font-weight: 700; padding: 40px; box-sizing: border-box; }
+        .min-num { font-size: 0.85rem; font-weight: 500; padding: 10px; box-sizing: border-box; }
+        .tick { position: absolute; width: 2px; height: 5px; background: #333; left: 50%; transform-origin: 0 250px; }
+        .dot { position: absolute; width: 4px; height: 4px; background: #999; border-radius: 50%; left: 50%; transform-origin: 0 250px; }
+        .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 4px; background: #222; }
+        .hour-hand { width: 8px; height: 130px; z-index: 10; }
+        .minute-hand { width: 5px; height: 180px; z-index: 11; background: #444; }
+        .second-hand { width: 2px; height: 210px; z-index: 12; background: #ff4757; }
+        .center-dot { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; background: #222; border-radius: 50%; transform: translate(-50%, -50%); z-index: 20; }
     </style>
 </head>
 <body>
-<svg viewBox="0 0 500 500">
-    <defs><clipPath id="c"><circle cx="250" cy="250" r="240"/></clipPath></defs>
-    <circle cx="250" cy="250" r="245" fill="white"/>
-    <g clip-path="url(#c)">
-        <rect x="0" y="0" width="500" height="250" fill="var(--mint)"/>
-        <rect x="0" y="250" width="500" height="250" fill="white"/>
-    </g>
-    <text x="250" y="345" style="font-size: 16px; opacity: 0.8;">Study with</text>
-    <text x="250" y="375" style="font-size: 28px;">Sonochiii</text>
-    <g id="ui"></g>
-    <g stroke-linecap="round">
-        <line id="h_h" x1="250" y1="250" x2="250" y2="150" stroke="#222" stroke-width="10"/>
-        <line id="m_h" x1="250" y1="250" x2="250" y2
+
+<div class="clock" id="clock">
+    <div class="logo">Study with<br><span>Sonochiii</span></div>
+    <div class="center-dot"></div>
+    <div class="hand hour-hand" id="hour"></div>
+    <div class="hand minute-hand" id="minute"></div>
+    <div class="hand second-hand" id="second"></div>
+</div>
+
+<script>
+    const clock = document.getElementById('clock');
+    for (let i = 1; i <= 24; i++) {
+        const hWrap = document.createElement('div');
+        hWrap.className = 'marker hour-num';
+        const rotation = i * 15;
+        hWrap.style.transform = `rotate(${rotation}deg)`;
+        hWrap.innerHTML = `<span style="display:inline-block; transform:rotate(-${rotation}deg)">${i}</span>`;
+        clock.appendChild(hWrap);
+        const tick = document.createElement('div');
+        tick.className = 'tick';
+        tick.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
+        clock.appendChild(tick);
+    }
+    for (let i = 0; i < 60; i++) {
+        const rotation = i * 6;
+        if (i % 5 === 0) {
+            const mWrap = document.createElement('div');
+            mWrap.className = 'marker min-num';
+            mWrap.style.transform = `rotate(${rotation}deg)`;
+            const label = i === 0 ? '00' : i.toString().padStart(2, '0');
+            mWrap.innerHTML = `<span style="display:inline-block; transform:rotate(-${rotation}deg)">${label}</span>`;
+            clock.appendChild(mWrap);
+        } else {
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.style.transform = `translateX(-50%) rotate(${rotation}deg) translateY(5px)`;
+            clock.appendChild(dot);
+        }
+    }
+    function update() {
+        const now = new Date();
+        const s = now.getSeconds(); const m = now.getMinutes(); const h = now.getHours();
+        const sDeg = (s / 60) * 360;
+        const mDeg = (m / 60) * 360 + (s / 60) * 6;
+        const hDeg = (h / 24) * 360 + (m / 60) * 15;
+        document.getElementById('second').style.transform = `translateX(-50%) rotate(${sDeg}deg)`;
+        document.getElementById('minute').style.transform = `translateX(-50%) rotate(${mDeg}deg)`;
+        document.getElementById('hour').style.transform = `translateX(-50%) rotate(${hDeg}deg)`;
+    }
+    setInterval(update, 1000); update();
+</script>
+
+</body>
+</html>
