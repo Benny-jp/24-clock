@@ -2,116 +2,35 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Study with Sonochiii - Definitive Standard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study with Sonochiii - Final Corrected 24H Clock</title>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --mint-green: #B2E2D2;
-            --logo-black: #2c2c2c;
-            --clock-size: 90vmin;
-        }
-        body {
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; margin: 0; background-color: #f5f5f5; overflow: hidden;
-        }
-        .clock {
-            width: var(--clock-size); height: var(--clock-size);
-            background: linear-gradient(to bottom, var(--mint-green) 50%, #ffffff 50%);
-            border: calc(var(--clock-size) * 0.02) solid #fff; border-radius: 50%;
-            position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-        }
-        /* 数字・目盛りの配置レイヤー：中心を軸に回転させる */
-        .layer {
-            position: absolute; inset: 0;
-            display: flex; justify-content: center; pointer-events: none;
-        }
-        /* 数字を直立させるための反転処理 */
-        .rotator {
-            display: flex; flex-direction: column; align-items: center;
-            width: 100%; height: 100%;
-        }
-        .upright {
-            display: inline-block;
-            font-family: 'Zen Maru Gothic', sans-serif;
-            font-weight: 900;
-        }
-
-        /* 5分刻み数字（最外周） */
-        .min-num { font-size: calc(var(--clock-size) * 0.045); color: #444; padding-top: calc(var(--clock-size) * 0.02); }
-        /* 1分刻みドット */
-        .dot { width: calc(var(--clock-size) * 0.01); height: calc(var(--clock-size) * 0.01); background: #bbb; border-radius: 50%; margin-top: calc(var(--clock-size) * 0.075); }
-        /* 24時間数字（中周） */
-        .hour-num { font-size: calc(var(--clock-size) * 0.07); color: #222; padding-top: calc(var(--clock-size) * 0.12); }
-
-        /* ロゴ：中央下部 */
-        .logo {
-            position: absolute; inset: 0;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transform: translateY(22%);
-            font-family: 'Zen Maru Gothic', sans-serif; font-weight: 900;
-            color: var(--logo-black); line-height: 1.1; pointer-events: none; z-index: 5;
-        }
-        .logo .label { font-size: calc(var(--clock-size) * 0.035); opacity: 0.8; }
-        .logo .brand { font-size: calc(var(--clock-size) * 0.06); letter-spacing: 0.02em; }
-
-        /* 針 */
-        .hand-container { position: absolute; inset: 0; z-index: 10; }
-        .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom center; border-radius: 10px; translate: -50% 0; }
-        .hour-hand { width: calc(var(--clock-size) * 0.02); height: calc(var(--clock-size) * 0.25); background: #222; }
-        .minute-hand { width: calc(var(--clock-size) * 0.012); height: calc(var(--clock-size) * 0.35); background: #444; }
-        .second-hand { width: calc(var(--clock-size) * 0.006); height: calc(var(--clock-size) * 0.42); background: #ff4757; }
-        .center-dot { position: absolute; inset: 0; margin: auto; width: calc(var(--clock-size) * 0.03); height: calc(var(--clock-size) * 0.03); background: #222; border-radius: 50%; z-index: 20; border: 2px solid #fff; }
+        :root { --mint: #B2E2D2; --black: #2c2c2c; }
+        body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f5f5f5; overflow: hidden; }
+        svg { width: 95vmin; height: 95vmin; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.1)); }
+        text { font-family: 'Zen Maru Gothic', sans-serif; font-weight: 900; text-anchor: middle; dominant-baseline: central; fill: var(--black); }
+        .hand { stroke-linecap: round; }
     </style>
 </head>
 <body>
 
-<div class="clock" id="clock">
-    <div class="logo"><div class="label">Study with</div><div class="brand">Sonochiii</div></div>
-    <div class="center-dot"></div>
-    <div id="h-hand-c" class="hand-container"><div class="hand hour-hand"></div></div>
-    <div id="m-hand-c" class="hand-container"><div class="hand minute-hand"></div></div>
-    <div id="s-hand-c" class="hand-container"><div class="hand second-hand"></div></div>
-</div>
+<svg viewBox="0 0 500 500">
+    <defs>
+        <clipPath id="circleView"><circle cx="250" cy="250" r="240" /></clipPath>
+    </defs>
+    <circle cx="250" cy="250" r="245" fill="white" />
+    <g clip-path="url(#circleView)">
+        <rect x="0" y="0" width="500" height="250" fill="var(--mint)" />
+        <rect x="0" y="250" width="500" height="250" fill="white" />
+    </g>
 
-<script>
-    const clock = document.getElementById('clock');
+    <text x="250" y="340" style="font-size: 16px; opacity: 0.8;">Study with</text>
+    <text x="250" y="365" style="font-size: 26px;">Sonochiii</text>
 
-    // 24時間表示（1から24）
-    for (let i = 1; i <= 24; i++) {
-        const deg = i * 15;
-        const layer = document.createElement('div');
-        layer.className = 'layer';
-        layer.style.transform = `rotate(${deg}deg)`;
-        layer.innerHTML = `<div class="rotator"><span class="upright hour-num" style="transform:rotate(-${deg}deg)">${i}</span></div>`;
-        clock.appendChild(layer);
-    }
+    <g id="markers"></g>
 
-    // 分数表示（00から55）とドット（1から59）
-    for (let i = 0; i < 60; i++) {
-        const deg = i * 6;
-        const layer = document.createElement('div');
-        layer.className = 'layer';
-        layer.style.transform = `rotate(${deg}deg)`;
-        
-        if (i % 5 === 0) {
-            const label = i.toString().padStart(2, '0');
-            layer.innerHTML = `<div class="rotator"><span class="upright min-num" style="transform:rotate(-${deg}deg)">${label}</span></div>`;
-        } else {
-            layer.innerHTML = `<div class="rotator"><div class="dot"></div></div>`;
-        }
-        clock.appendChild(layer);
-    }
-
-    function update() {
-        const now = new Date();
-        const s = now.getSeconds(); const m = now.getMinutes(); const h = now.getHours();
-        document.getElementById('s-hand-c').style.transform = `rotate(${s * 6}deg)`;
-        document.getElementById('m-hand-c').style.transform = `rotate(${m * 6 + s * 0.1}deg)`;
-        document.getElementById('h-hand-c').style.transform = `rotate(${h * 15 + m * 0.25}deg)`;
-    }
-    setInterval(update, 1000); update();
-</script>
-</body>
-</html>
+    <line id="hour" class="hand" x1="250" y1="250" x2="250" y2="140" stroke="#222" stroke-width="10" />
+    <line id="minute" class="hand" x1="250" y1="250" x2="250" y2="90" stroke="#444" stroke-width="6" />
+    <line id="second" class="hand" x1="250" y1="250" x2="250" y2="70" stroke="#ff4757" stroke-width="2" />
+    <circle cx="250" cy="250" r="8" fill="#222" stroke="white" stroke-width="2"
