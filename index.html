@@ -3,54 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-
     <title>Study with Sonochiii - Dual Tone 24H Clock</title>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --mint-green: #B2E2D2;
-            --logo-black: #2c2c2c; /* 少しだけ柔らかい黒 */
-            --clock-size: 500px;
+            --logo-black: #2c2c2c;
+            --clock-size: 90vmin; /* 画面の短い方の90%に合わせる */
         }
         body {
             display: flex; justify-content: center; align-items: center;
             height: 100vh; margin: 0; background-color: #eee;
+            overflow: hidden; /* スクロールバーを出さない */
         }
         .clock {
             width: var(--clock-size); height: var(--clock-size);
-            /* 修正点：配色を「右：ミント」から「上：ミント、下：白」へ変更 */
             background: linear-gradient(to bottom, var(--mint-green) 50%, #ffffff 50%);
-            border: 12px solid #fff; border-radius: 50%;
-            position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border: calc(var(--clock-size) * 0.024) solid #fff;
+            border-radius: 50%;
+            position: relative; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
         }
         .logo {
-            position: absolute; 
-            top: 66%; /* 改行に合わせて位置を微調整 */
-            width: 100%;
-            text-align: center; 
-            font-weight: 900; 
-            font-size: 1.3rem; 
-            line-height: 1.2; /* 行間を詰めて一体感を出す */
-            color: var(--logo-black); 
+            position: absolute; top: 66%; width: 100%; text-align: center;
+            font-weight: 900; font-size: calc(var(--clock-size) * 0.05);
+            line-height: 1.2; color: var(--logo-black);
             font-family: 'Zen Maru Gothic', sans-serif;
-            letter-spacing: 0.02em;
             z-index: 15;
-            filter: drop-shadow(0 0 2px rgba(255,255,255,0.8)); /* 視認性UP */
         }
-        .logo span { font-size: 1.5rem; } /* Sonochiiiを少し大きく */
+        .logo span { font-size: calc(var(--clock-size) * 0.06); }
         
-        /* 以下、時計の基本構造（変更なし） */
+        /* マーカーと数字の設定 */
         .marker { position: absolute; width: 100%; height: 100%; text-align: center; color: #333; font-family: 'Zen Maru Gothic', sans-serif; }
-        .hour-num { font-size: 1.6rem; font-weight: 700; padding: 40px; box-sizing: border-box; }
-        .min-num { font-size: 0.85rem; font-weight: 500; padding: 10px; box-sizing: border-box; }
-        .tick { position: absolute; width: 2px; height: 5px; background: #333; left: 50%; transform-origin: 0 250px; }
-        .dot { position: absolute; width: 4px; height: 4px; background: #999; border-radius: 50%; left: 50%; transform-origin: 0 250px; }
+        .hour-num { font-size: calc(var(--clock-size) * 0.06); font-weight: 700; padding: 8%; box-sizing: border-box; }
+        .min-num { font-size: calc(var(--clock-size) * 0.035); font-weight: 500; padding: 2%; box-sizing: border-box; }
+        
+        /* 針の設定（すべて%で指定してサイズ変化に対応） */
         .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 4px; background: #222; }
-        .hour-hand { width: 8px; height: 130px; z-index: 10; }
-        .minute-hand { width: 5px; height: 180px; z-index: 11; background: #444; }
-        .second-hand { width: 2px; height: 210px; z-index: 12; background: #ff4757; }
-        .center-dot { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; background: #222; border-radius: 50%; transform: translate(-50%, -50%); z-index: 20; }
+        .hour-hand { width: 1.6%; height: 26%; z-index: 10; }
+        .minute-hand { width: 1%; height: 36%; z-index: 11; background: #444; }
+        .second-hand { width: 0.4%; height: 42%; z-index: 12; background: #ff4757; }
+        .center-dot { position: absolute; top: 50%; left: 50%; width: 3%; height: 3%; background: #222; border-radius: 50%; transform: translate(-50%, -50%); z-index: 20; }
+        
+        /* 目盛り（JavaScriptで回転させるための基準） */
+        .tick, .dot { position: absolute; left: 50%; transform-origin: bottom; }
+        .tick { width: 0.4%; height: 2%; background: #333; bottom: 96%; }
+        .dot { width: 0.8%; height: 0.8%; background: #999; border-radius: 50%; bottom: 97.5%; }
     </style>
 </head>
 <body>
@@ -65,6 +63,8 @@
 
 <script>
     const clock = document.getElementById('clock');
+    
+    // 24時間目盛りの作成
     for (let i = 1; i <= 24; i++) {
         const hWrap = document.createElement('div');
         hWrap.className = 'marker hour-num';
@@ -72,11 +72,18 @@
         hWrap.style.transform = `rotate(${rotation}deg)`;
         hWrap.innerHTML = `<span style="display:inline-block; transform:rotate(-${rotation}deg)">${i}</span>`;
         clock.appendChild(hWrap);
+
         const tick = document.createElement('div');
         tick.className = 'tick';
+        // 針と同じく中心から回転させるために高さを調整
+        tick.style.height = '2%';
+        tick.style.bottom = '50%';
+        tick.style.transformOrigin = `0 calc(var(--clock-size) / 2)`;
         tick.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
         clock.appendChild(tick);
     }
+
+    // 分目盛りの作成
     for (let i = 0; i < 60; i++) {
         const rotation = i * 6;
         if (i % 5 === 0) {
@@ -89,10 +96,13 @@
         } else {
             const dot = document.createElement('div');
             dot.className = 'dot';
-            dot.style.transform = `translateX(-50%) rotate(${rotation}deg) translateY(5px)`;
+            dot.style.bottom = '50%';
+            dot.style.transformOrigin = `0 calc(var(--clock-size) / 2)`;
+            dot.style.transform = `translateX(-50%) rotate(${rotation}deg) translateY(calc(var(--clock-size) * -0.48))`;
             clock.appendChild(dot);
         }
     }
+
     function update() {
         const now = new Date();
         const s = now.getSeconds(); const m = now.getMinutes(); const h = now.getHours();
