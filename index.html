@@ -3,34 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study with Sonochiii - Final Corrected 24H Clock</title>
+    <title>Study with Sonochiii - Final Corrected</title>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@900&display=swap" rel="stylesheet">
     <style>
         :root { --mint: #B2E2D2; --black: #2c2c2c; }
         body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f5f5f5; overflow: hidden; }
-        svg { width: 95vmin; height: 95vmin; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.1)); }
+        svg { width: 95vmin; height: 95vmin; }
         text { font-family: 'Zen Maru Gothic', sans-serif; font-weight: 900; text-anchor: middle; dominant-baseline: central; fill: var(--black); }
-        .hand { stroke-linecap: round; }
     </style>
 </head>
 <body>
-
 <svg viewBox="0 0 500 500">
-    <defs>
-        <clipPath id="circleView"><circle cx="250" cy="250" r="240" /></clipPath>
-    </defs>
-    <circle cx="250" cy="250" r="245" fill="white" />
-    <g clip-path="url(#circleView)">
-        <rect x="0" y="0" width="500" height="250" fill="var(--mint)" />
-        <rect x="0" y="250" width="500" height="250" fill="white" />
+    <defs><clipPath id="c"><circle cx="250" cy="250" r="240"/></clipPath></defs>
+    <circle cx="250" cy="250" r="245" fill="white"/>
+    <g clip-path="url(#c)">
+        <rect x="0" y="0" width="500" height="250" fill="var(--mint)"/>
+        <rect x="0" y="250" width="500" height="250" fill="white"/>
     </g>
-
-    <text x="250" y="340" style="font-size: 16px; opacity: 0.8;">Study with</text>
-    <text x="250" y="365" style="font-size: 26px;">Sonochiii</text>
-
-    <g id="markers"></g>
-
-    <line id="hour" class="hand" x1="250" y1="250" x2="250" y2="140" stroke="#222" stroke-width="10" />
-    <line id="minute" class="hand" x1="250" y1="250" x2="250" y2="90" stroke="#444" stroke-width="6" />
-    <line id="second" class="hand" x1="250" y1="250" x2="250" y2="70" stroke="#ff4757" stroke-width="2" />
-    <circle cx="250" cy="250" r="8" fill="#222" stroke="white" stroke-width="2"
+    <text x="250" y="345" style="font-size: 16px; opacity: 0.8;">Study with</text>
+    <text x="250" y="375" style="font-size: 28px;">Sonochiii</text>
+    <g id="ui"></g>
+    <g stroke-linecap="round">
+        <line id="h_h" x1="250" y1="250" x2="250" y2="150" stroke="#222" stroke-width="10"/>
+        <line id="m_h" x1="250" y1="250" x2="250" y2
