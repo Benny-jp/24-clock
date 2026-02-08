@@ -2,59 +2,59 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Study with Sonochiii - Dual Tone 24H Clock</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study with Sonochiii - 24H Clock</title>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --mint-green: #B2E2D2;
             --logo-black: #2c2c2c;
-            --clock-size: 90vmin; /* 画面の短い方の90%に合わせる */
+            --clock-size: 90vmin;
         }
         body {
             display: flex; justify-content: center; align-items: center;
-            height: 100vh; margin: 0; background-color: #eee;
-            overflow: hidden; /* スクロールバーを出さない */
+            height: 100vh; margin: 0; background-color: #eee; overflow: hidden;
         }
         .clock {
             width: var(--clock-size); height: var(--clock-size);
             background: linear-gradient(to bottom, var(--mint-green) 50%, #ffffff 50%);
-            border: calc(var(--clock-size) * 0.024) solid #fff;
-            border-radius: 50%;
-            position: relative; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border: calc(var(--clock-size) * 0.02) solid #fff;
+            border-radius: 50%; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
+        /* ロゴ */
         .logo {
             position: absolute; top: 66%; width: 100%; text-align: center;
-            font-weight: 900; font-size: calc(var(--clock-size) * 0.05);
-            line-height: 1.2; color: var(--logo-black);
-            font-family: 'Zen Maru Gothic', sans-serif;
-            z-index: 15;
+            font-family: 'Zen Maru Gothic', sans-serif; font-weight: 900;
+            font-size: calc(var(--clock-size) * 0.05); color: var(--logo-black); z-index: 15;
         }
-        .logo span { font-size: calc(var(--clock-size) * 0.06); }
-        
-        /* マーカーと数字の設定 */
-        .marker { position: absolute; width: 100%; height: 100%; text-align: center; color: #333; font-family: 'Zen Maru Gothic', sans-serif; }
-        .hour-num { font-size: calc(var(--clock-size) * 0.06); font-weight: 700; padding: 8%; box-sizing: border-box; }
-        .min-num { font-size: calc(var(--clock-size) * 0.035); font-weight: 500; padding: 2%; box-sizing: border-box; }
-        
-        /* 針の設定（すべて%で指定してサイズ変化に対応） */
-        .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 4px; background: #222; }
-        .hour-hand { width: 1.6%; height: 26%; z-index: 10; }
-        .minute-hand { width: 1%; height: 36%; z-index: 11; background: #444; }
-        .second-hand { width: 0.4%; height: 42%; z-index: 12; background: #ff4757; }
-        .center-dot { position: absolute; top: 50%; left: 50%; width: 3%; height: 3%; background: #222; border-radius: 50%; transform: translate(-50%, -50%); z-index: 20; }
-        
-        /* 目盛り（JavaScriptで回転させるための基準） */
-        .tick, .dot { position: absolute; left: 50%; transform-origin: bottom; }
-        .tick { width: 0.4%; height: 2%; background: #333; bottom: 96%; }
-        .dot { width: 0.8%; height: 0.8%; background: #999; border-radius: 50%; bottom: 97.5%; }
+        /* 針の共通設定 */
+        .hand {
+            position: absolute; left: 50%; bottom: 50%;
+            transform-origin: bottom center; border-radius: 10px;
+            transform: translateX(-50%) rotate(0deg);
+        }
+        .hour-hand { width: 1.5%; height: 28%; background: #222; z-index: 10; }
+        .minute-hand { width: 1%; height: 38%; background: #444; z-index: 11; }
+        .second-hand { width: 0.5%; height: 43%; background: #ff4757; z-index: 12; }
+        .center-dot {
+            position: absolute; top: 50%; left: 50%; width: 3%; height: 3%;
+            background: #222; border-radius: 50%; transform: translate(-50%, -50%); z-index: 20;
+        }
+        /* 数字とドットの配置 */
+        .marker {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: flex-start;
+            font-family: 'Zen Maru Gothic', sans-serif;
+        }
+        .hour-num { font-size: calc(var(--clock-size) * 0.06); font-weight: 700; padding-top: 7%; }
+        .min-num { font-size: calc(var(--clock-size) * 0.03); font-weight: 500; padding-top: 2%; }
+        .dot-marker { width: 0.8%; height: 0.8%; background: #999; border-radius: 50%; margin-top: 3%; }
     </style>
 </head>
 <body>
 
-<div class="clock" id="clock">
-    <div class="logo">Study with<br><span>Sonochiii</span></div>
+<div class="clock" id="clock-face">
+    <div class="logo">Study with<br><span style="font-size:1.2em">Sonochiii</span></div>
     <div class="center-dot"></div>
     <div class="hand hour-hand" id="hour"></div>
     <div class="hand minute-hand" id="minute"></div>
@@ -62,59 +62,51 @@
 </div>
 
 <script>
-    const clock = document.getElementById('clock');
-    
-    // 24時間目盛りの作成
-    for (let i = 1; i <= 24; i++) {
-        const hWrap = document.createElement('div');
-        hWrap.className = 'marker hour-num';
-        const rotation = i * 15;
-        hWrap.style.transform = `rotate(${rotation}deg)`;
-        hWrap.innerHTML = `<span style="display:inline-block; transform:rotate(-${rotation}deg)">${i}</span>`;
-        clock.appendChild(hWrap);
+    const face = document.getElementById('clock-face');
 
-        const tick = document.createElement('div');
-        tick.className = 'tick';
-        // 針と同じく中心から回転させるために高さを調整
-        tick.style.height = '2%';
-        tick.style.bottom = '50%';
-        tick.style.transformOrigin = `0 calc(var(--clock-size) / 2)`;
-        tick.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
-        clock.appendChild(tick);
-    }
+    // 24時間・分・ドットをまとめて生成
+    for (let i = 1; i <= 60; i++) {
+        const container = document.createElement('div');
+        container.className = 'marker';
+        
+        // 24時間の数字 (15度おき)
+        if (i <= 24) {
+            const hNum = document.createElement('div');
+            hNum.className = 'hour-num';
+            hNum.innerHTML = `<span style="display:block; transform:rotate(${-i * 15}deg)">${i}</span>`;
+            container.style.transform = `rotate(${i * 15}deg)`;
+            container.appendChild(hNum);
+            face.appendChild(container.cloneNode(true));
+        }
 
-    // 分目盛りの作成
-    for (let i = 0; i < 60; i++) {
+        // 分の数字とドット (6度おき)
+        const minContainer = document.createElement('div');
+        minContainer.className = 'marker';
         const rotation = i * 6;
+        minContainer.style.transform = `rotate(${rotation}deg)`;
+
         if (i % 5 === 0) {
-            const mWrap = document.createElement('div');
-            mWrap.className = 'marker min-num';
-            mWrap.style.transform = `rotate(${rotation}deg)`;
-            const label = i === 0 ? '00' : i.toString().padStart(2, '0');
-            mWrap.innerHTML = `<span style="display:inline-block; transform:rotate(-${rotation}deg)">${label}</span>`;
-            clock.appendChild(mWrap);
+            const mNum = document.createElement('div');
+            mNum.className = 'min-num';
+            const label = i === 60 ? '00' : i.toString().padStart(2, '0');
+            mNum.innerHTML = `<span style="display:block; transform:rotate(${-rotation}deg)">${label}</span>`;
+            minContainer.appendChild(mNum);
         } else {
             const dot = document.createElement('div');
-            dot.className = 'dot';
-            dot.style.bottom = '50%';
-            dot.style.transformOrigin = `0 calc(var(--clock-size) / 2)`;
-            dot.style.transform = `translateX(-50%) rotate(${rotation}deg) translateY(calc(var(--clock-size) * -0.48))`;
-            clock.appendChild(dot);
+            dot.className = 'dot-marker';
+            minContainer.appendChild(dot);
         }
+        face.appendChild(minContainer);
     }
 
     function update() {
         const now = new Date();
         const s = now.getSeconds(); const m = now.getMinutes(); const h = now.getHours();
-        const sDeg = (s / 60) * 360;
-        const mDeg = (m / 60) * 360 + (s / 60) * 6;
-        const hDeg = (h / 24) * 360 + (m / 60) * 15;
-        document.getElementById('second').style.transform = `translateX(-50%) rotate(${sDeg}deg)`;
-        document.getElementById('minute').style.transform = `translateX(-50%) rotate(${mDeg}deg)`;
-        document.getElementById('hour').style.transform = `translateX(-50%) rotate(${hDeg}deg)`;
+        document.getElementById('second').style.transform = `translateX(-50%) rotate(${(s / 60) * 360}deg)`;
+        document.getElementById('minute').style.transform = `translateX(-50%) rotate(${(m / 60) * 360 + (s / 60) * 6}deg)`;
+        document.getElementById('hour').style.transform = `translateX(-50%) rotate(${(h / 24) * 360 + (m / 60) * 15}deg)`;
     }
     setInterval(update, 1000); update();
 </script>
-
 </body>
 </html>
