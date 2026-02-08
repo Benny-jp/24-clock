@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Study with Sonochiii - Dual Tone 24H Clock</title>
+    <title>Study with Sonochiii - Functional 24H Clock</title>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -16,37 +16,35 @@
         }
         .clock {
             width: var(--clock-size); height: var(--clock-size);
-            /* 配色の指令：上部ミントグリーン / 下部ホワイト */
+            /* 最適化：上部ミントグリーン / 下部白 */
             background: linear-gradient(to bottom, var(--mint-green) 50%, #ffffff 50%);
             border: 12px solid #fff; border-radius: 50%;
             position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.15);
         }
-        .logo {
-            position: absolute; 
-            top: 66%; 
-            width: 100%;
-            text-align: center; 
-            font-weight: 900; 
-            font-size: 1.3rem; 
-            line-height: 1.2;
-            color: var(--logo-black); 
-            font-family: 'Zen Maru Gothic', sans-serif;
-            letter-spacing: 0.02em;
-            z-index: 15;
-            filter: drop-shadow(0 0 2px rgba(255,255,255,0.8));
+        /* 針の共通設定：回転軸を「下端の中央」に厳密固定 */
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            border-radius: 4px;
+            /* 左右中央に配置するための補正 */
+            translate: -50% 0;
         }
-        .logo span { font-size: 1.5rem; }
+        .hour-hand { width: 8px; height: 130px; background: #222; z-index: 10; }
+        .minute-hand { width: 5px; height: 180px; background: #444; z-index: 11; }
+        .second-hand { width: 2px; height: 210px; background: #ff4757; z-index: 12; }
+
+        .center-dot { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; background: #222; border-radius: 50%; transform: translate(-50%, -50%); z-index: 20; }
         
+        /* ロゴ・メモリ等 */
+        .logo { position: absolute; top: 66%; width: 100%; text-align: center; font-weight: 900; font-size: 1.3rem; line-height: 1.2; color: var(--logo-black); font-family: 'Zen Maru Gothic', sans-serif; z-index: 15; filter: drop-shadow(0 0 2px rgba(255,255,255,0.8)); }
+        .logo span { font-size: 1.5rem; }
         .marker { position: absolute; width: 100%; height: 100%; text-align: center; color: #333; font-family: 'Zen Maru Gothic', sans-serif; }
         .hour-num { font-size: 1.6rem; font-weight: 700; padding: 40px; box-sizing: border-box; }
         .min-num { font-size: 0.85rem; font-weight: 500; padding: 10px; box-sizing: border-box; }
-        .tick { position: absolute; width: 2px; height: 10px; background: #333; left: 50%; transform-origin: center 250px; }
-        .dot { position: absolute; width: 4px; height: 4px; background: #999; border-radius: 50%; left: 50%; transform-origin: center 250px; }
-        .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 4px; background: #222; }
-        .hour-hand { width: 8px; height: 130px; z-index: 10; }
-        .minute-hand { width: 5px; height: 180px; z-index: 11; background: #444; }
-        .second-hand { width: 2px; height: 210px; z-index: 12; background: #ff4757; }
-        .center-dot { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; background: #222; border-radius: 50%; transform: translate(-50%, -50%); z-index: 20; }
+        .tick { position: absolute; width: 2px; height: 10px; background: #333; left: 50%; top: 0; transform-origin: center 250px; }
+        .dot { position: absolute; width: 4px; height: 4px; background: #999; border-radius: 50%; left: 50%; top: 10px; transform-origin: center 240px; }
     </style>
 </head>
 <body>
@@ -61,11 +59,11 @@
 
 <script>
     const clock = document.getElementById('clock');
-    // 24時間メモリ生成
+    // メモリ生成
     for (let i = 1; i <= 24; i++) {
+        const rotation = i * 15;
         const hWrap = document.createElement('div');
         hWrap.className = 'marker hour-num';
-        const rotation = i * 15;
         hWrap.style.transform = `rotate(${rotation}deg)`;
         hWrap.innerHTML = `<span style="display:inline-block; transform:rotate(-${rotation}deg)">${i}</span>`;
         clock.appendChild(hWrap);
@@ -75,30 +73,25 @@
         tick.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
         clock.appendChild(tick);
     }
-    // 60分メモリ生成
-    for (let i = 0; i < 60; i++) {
-        const rotation = i * 6;
-        if (i % 5 === 0) {
-            const mWrap = document.createElement('div');
-            mWrap.className = 'marker min-num';
-            mWrap.style.transform = `rotate(${rotation}deg)`;
-            const label = i === 0 ? '00' : i.toString().padStart(2, '0');
-            mWrap.innerHTML = `<span style="display:inline-block; transform:rotate(-${rotation}deg)">${label}</span>`;
-            clock.appendChild(mWrap);
-        } else {
-            const dot = document.createElement('div');
-            dot.className = 'dot';
-            dot.style.transform = `translateX(-50%) rotate(${rotation}deg) translateY(10px)`;
-            clock.appendChild(dot);
-        }
-    }
 
     function update() {
         const now = new Date();
-        const s = now.getSeconds(); const m = now.getMinutes(); const h = now.getHours();
+        const s = now.getSeconds(); 
+        const m = now.getMinutes(); 
+        const h = now.getHours();
+        
+        // 針の回転計算
         const sDeg = (s / 60) * 360;
         const mDeg = (m / 60) * 360 + (s / 60) * 6;
+        // 24時間時計：1時間 = 15度 (360/24)
         const hDeg = (h / 24) * 360 + (m / 60) * 15;
-        document.getElementById('second').style.transform = `translateX(-50%) rotate(${sDeg}deg)`;
-        document.getElementById('minute').style.transform = `translateX(-50%) rotate(${mDeg}deg)`;
-        document.getElementById('hour').style.transform = `translateX(-50
+
+        // translate(-50%, 0) を維持して回転を適用
+        document.getElementById('second').style.transform = `rotate(${sDeg}deg)`;
+        document.getElementById('minute').style.transform = `rotate(${mDeg}deg)`;
+        document.getElementById('hour').style.transform = `rotate(${hDeg}deg)`;
+    }
+    setInterval(update, 1000); update();
+</script>
+</body>
+</html>
