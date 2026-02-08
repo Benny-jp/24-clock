@@ -1,7 +1,46 @@
-#clock-container {
-  width: 90vmin;  /* vminは「縦と横のうち、短い方」を100とする単位 */
-  height: 90vmin; 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+<style>
+    :root {
+        --mint-green: #B2E2D2;
+        --logo-black: #2c2c2c;
+        /* 【修正点1】pxをやめて、画面の「短い方の辺」の90%サイズにする */
+        --clock-size: 90vmin; 
+    }
+    body {
+        display: flex; justify-content: center; align-items: center;
+        height: 100vh; margin: 0; background-color: #eee;
+        /* 【修正点2】画面からはみ出さないお守り */
+        overflow: hidden; 
+    }
+    .clock {
+        width: var(--clock-size); height: var(--clock-size);
+        background: linear-gradient(to bottom, var(--mint-green) 50%, #ffffff 50%);
+        border: calc(var(--clock-size) * 0.024) solid #fff; /* 線もサイズに合わせる */
+        border-radius: 50%;
+        position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+    .logo {
+        position: absolute; 
+        top: 66%; width: 100%; text-align: center; font-weight: 900; 
+        /* 【修正点3】文字もサイズに合わせて伸び縮みさせる */
+        font-size: calc(var(--clock-size) * 0.05); 
+        line-height: 1.2; color: var(--logo-black); 
+        font-family: 'Zen Maru Gothic', sans-serif;
+        letter-spacing: 0.02em; z-index: 15;
+        filter: drop-shadow(0 0 2px rgba(255,255,255,0.8));
+    }
+    .logo span { font-size: calc(var(--clock-size) * 0.06); } 
+
+    /* 目盛りや針の位置計算の基準（250px）を半分（50%）に直す */
+    .tick { position: absolute; width: 2px; height: 3%; background: #333; left: 50%; transform-origin: 0 calc(var(--clock-size) / 2); }
+    .dot { position: absolute; width: 4px; height: 4px; background: #999; border-radius: 50%; left: 50%; transform-origin: 0 calc(var(--clock-size) / 2); }
+
+    /* 数字のサイズも可変にする */
+    .hour-num { font-size: calc(var(--clock-size) * 0.06); font-weight: 700; padding: 8%; box-sizing: border-box; }
+    .min-num { font-size: calc(var(--clock-size) * 0.035); font-weight: 500; padding: 2%; box-sizing: border-box; }
+
+    /* 針のサイズも可変にする */
+    .hour-hand { width: calc(var(--clock-size) * 0.016); height: 26%; z-index: 10; }
+    .minute-hand { width: calc(var(--clock-size) * 0.01); height: 36%; z-index: 11; background: #444; }
+    .second-hand { width: calc(var(--clock-size) * 0.004); height: 42%; z-index: 12; background: #ff4757; }
+    .center-dot { position: absolute; top: 50%; left: 50%; width: calc(var(--clock-size) * 0.03); height: calc(var(--clock-size) * 0.03); background: #222; border-radius: 50%; transform: translate(-50%, -50%); z-index: 20; }
+</style>
