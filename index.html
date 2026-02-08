@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Study with Sonochiii - Final Standard</title>
+    <title>Study with Sonochiii - Definitive Standard</title>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -22,35 +22,42 @@
             position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.1);
             box-sizing: border-box;
         }
-        /* 数字の基本スタイル：すべて直立状態で配置 */
-        .marker {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            display: flex; justify-content: center; align-items: center;
-            font-family: 'Zen Maru Gothic', sans-serif;
-            pointer-events: none;
+        /* 数字・目盛りの配置レイヤー：中心を軸に回転させる */
+        .layer {
+            position: absolute; inset: 0;
+            display: flex; justify-content: center; pointer-events: none;
         }
-        .hour-num { font-size: calc(var(--clock-size) * 0.065); font-weight: 900; color: #222; }
-        .min-num { font-size: calc(var(--clock-size) * 0.045); font-weight: 900; color: #444; }
-        
-        /* 1分刻みのドット */
-        .dot {
-            position: absolute; width: calc(var(--clock-size) * 0.008); height: calc(var(--clock-size) * 0.008);
-            background: #bbb; border-radius: 50%; transform: translate(-50%, -50%);
+        /* 数字を直立させるための反転処理 */
+        .rotator {
+            display: flex; flex-direction: column; align-items: center;
+            width: 100%; height: 100%;
+        }
+        .upright {
+            display: inline-block;
+            font-family: 'Zen Maru Gothic', sans-serif;
+            font-weight: 900;
         }
 
-        /* ロゴ：視認性を確保した中央下部配置 */
+        /* 5分刻み数字（最外周） */
+        .min-num { font-size: calc(var(--clock-size) * 0.045); color: #444; padding-top: calc(var(--clock-size) * 0.02); }
+        /* 1分刻みドット */
+        .dot { width: calc(var(--clock-size) * 0.01); height: calc(var(--clock-size) * 0.01); background: #bbb; border-radius: 50%; margin-top: calc(var(--clock-size) * 0.075); }
+        /* 24時間数字（中周） */
+        .hour-num { font-size: calc(var(--clock-size) * 0.07); color: #222; padding-top: calc(var(--clock-size) * 0.12); }
+
+        /* ロゴ：中央下部 */
         .logo {
-            position: absolute; width: 100%; top: 68%;
-            display: flex; flex-direction: column; align-items: center;
-            font-weight: 900; font-family: 'Zen Maru Gothic', sans-serif;
-            color: var(--logo-black); line-height: 1.1; pointer-events: none;
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transform: translateY(22%);
+            font-family: 'Zen Maru Gothic', sans-serif; font-weight: 900;
+            color: var(--logo-black); line-height: 1.1; pointer-events: none; z-index: 5;
         }
         .logo .label { font-size: calc(var(--clock-size) * 0.035); opacity: 0.8; }
         .logo .brand { font-size: calc(var(--clock-size) * 0.06); letter-spacing: 0.02em; }
 
-        /* 針のデザイン */
-        .hand-container { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+        /* 針 */
+        .hand-container { position: absolute; inset: 0; z-index: 10; }
         .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom center; border-radius: 10px; translate: -50% 0; }
         .hour-hand { width: calc(var(--clock-size) * 0.02); height: calc(var(--clock-size) * 0.25); background: #222; }
         .minute-hand { width: calc(var(--clock-size) * 0.012); height: calc(var(--clock-size) * 0.35); background: #444; }
@@ -70,25 +77,41 @@
 
 <script>
     const clock = document.getElementById('clock');
-    const size = clock.offsetWidth;
-    const center = size / 2;
 
-    function placeMarker(value, angleDeg, distanceFactor, className) {
-        const angleRad = (angleDeg - 90) * (Math.PI / 180);
-        const x = center + (size * distanceFactor) * Math.cos(angleRad);
-        const y = center + (size * distanceFactor) * Math.sin(angleRad);
-        const el = document.createElement('div');
-        el.className = className;
-        el.style.left = `${x}px`;
-        el.style.top = `${y}px`;
-        el.innerHTML = value;
-        clock.appendChild(el);
-    }
-
-    // 24時間インデックス（中周：距離35%）
+    // 24時間表示（1から24）
     for (let i = 1; i <= 24; i++) {
-        placeMarker(i, i * 15, 0.35, 'marker hour-num');
+        const deg = i * 15;
+        const layer = document.createElement('div');
+        layer.className = 'layer';
+        layer.style.transform = `rotate(${deg}deg)`;
+        layer.innerHTML = `<div class="rotator"><span class="upright hour-num" style="transform:rotate(-${deg}deg)">${i}</span></div>`;
+        clock.appendChild(layer);
     }
 
-    // 分数インデックス（外周：距離45%）とドット（距離41%）
-    for (let i = 0; i < 6
+    // 分数表示（00から55）とドット（1から59）
+    for (let i = 0; i < 60; i++) {
+        const deg = i * 6;
+        const layer = document.createElement('div');
+        layer.className = 'layer';
+        layer.style.transform = `rotate(${deg}deg)`;
+        
+        if (i % 5 === 0) {
+            const label = i.toString().padStart(2, '0');
+            layer.innerHTML = `<div class="rotator"><span class="upright min-num" style="transform:rotate(-${deg}deg)">${label}</span></div>`;
+        } else {
+            layer.innerHTML = `<div class="rotator"><div class="dot"></div></div>`;
+        }
+        clock.appendChild(layer);
+    }
+
+    function update() {
+        const now = new Date();
+        const s = now.getSeconds(); const m = now.getMinutes(); const h = now.getHours();
+        document.getElementById('s-hand-c').style.transform = `rotate(${s * 6}deg)`;
+        document.getElementById('m-hand-c').style.transform = `rotate(${m * 6 + s * 0.1}deg)`;
+        document.getElementById('h-hand-c').style.transform = `rotate(${h * 15 + m * 0.25}deg)`;
+    }
+    setInterval(update, 1000); update();
+</script>
+</body>
+</html>
