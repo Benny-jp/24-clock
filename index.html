@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Study with Sonochiii - 24H Clock</title>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
     <style>
@@ -21,34 +21,34 @@
             border: calc(var(--clock-size) * 0.02) solid #fff;
             border-radius: 50%; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-        /* ロゴ */
         .logo {
             position: absolute; top: 66%; width: 100%; text-align: center;
             font-family: 'Zen Maru Gothic', sans-serif; font-weight: 900;
             font-size: calc(var(--clock-size) * 0.05); color: var(--logo-black); z-index: 15;
         }
-        /* 針の共通設定 */
         .hand {
             position: absolute; left: 50%; bottom: 50%;
             transform-origin: bottom center; border-radius: 10px;
             transform: translateX(-50%) rotate(0deg);
         }
-        .hour-hand { width: 1.5%; height: 28%; background: #222; z-index: 10; }
-        .minute-hand { width: 1%; height: 38%; background: #444; z-index: 11; }
-        .second-hand { width: 0.5%; height: 43%; background: #ff4757; z-index: 12; }
+        /* 針の長さを調整して数字に被らないようにしました */
+        .hour-hand { width: 1.5%; height: 25%; background: #222; z-index: 10; }
+        .minute-hand { width: 1%; height: 33%; background: #444; z-index: 11; }
+        .second-hand { width: 0.5%; height: 40%; background: #ff4757; z-index: 12; }
+        
         .center-dot {
             position: absolute; top: 50%; left: 50%; width: 3%; height: 3%;
             background: #222; border-radius: 50%; transform: translate(-50%, -50%); z-index: 20;
         }
-        /* 数字とドットの配置 */
         .marker {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: flex-start;
             font-family: 'Zen Maru Gothic', sans-serif;
         }
-        .hour-num { font-size: calc(var(--clock-size) * 0.06); font-weight: 700; padding-top: 7%; }
-        .min-num { font-size: calc(var(--clock-size) * 0.03); font-weight: 500; padding-top: 2%; }
-        .dot-marker { width: 0.8%; height: 0.8%; background: #999; border-radius: 50%; margin-top: 3%; }
+        /* 数字の位置を外側にズラしました */
+        .hour-num { font-size: calc(var(--clock-size) * 0.06); font-weight: 700; padding-top: 4%; }
+        .min-num { font-size: calc(var(--clock-size) * 0.03); font-weight: 500; padding-top: 0.5%; }
+        .dot-marker { width: 0.8%; height: 0.8%; background: #999; border-radius: 50%; margin-top: 2.5%; }
     </style>
 </head>
 <body>
@@ -63,13 +63,9 @@
 
 <script>
     const face = document.getElementById('clock-face');
-
-    // 24時間・分・ドットをまとめて生成
     for (let i = 1; i <= 60; i++) {
         const container = document.createElement('div');
         container.className = 'marker';
-        
-        // 24時間の数字 (15度おき)
         if (i <= 24) {
             const hNum = document.createElement('div');
             hNum.className = 'hour-num';
@@ -78,13 +74,10 @@
             container.appendChild(hNum);
             face.appendChild(container.cloneNode(true));
         }
-
-        // 分の数字とドット (6度おき)
         const minContainer = document.createElement('div');
         minContainer.className = 'marker';
         const rotation = i * 6;
         minContainer.style.transform = `rotate(${rotation}deg)`;
-
         if (i % 5 === 0) {
             const mNum = document.createElement('div');
             mNum.className = 'min-num';
@@ -98,7 +91,6 @@
         }
         face.appendChild(minContainer);
     }
-
     function update() {
         const now = new Date();
         const s = now.getSeconds(); const m = now.getMinutes(); const h = now.getHours();
